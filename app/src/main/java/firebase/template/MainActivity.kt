@@ -3,6 +3,8 @@ package firebase.template
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,12 +37,19 @@ import androidx.compose.ui.unit.dp
 import firebase.template.ui.theme.FirebaseTemplateTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,7 +78,8 @@ class MainActivity : ComponentActivity() {
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.SpaceBetween)
                                         {
-                                            SwipeToDismissExample()
+                                            AngledSwipeToDismissSimplified()
+//                                            SwipeToDismissExample()
                                         }
                                     }
                                 }
@@ -122,7 +132,8 @@ fun SwipeToDismissExample() {
                         .fillMaxSize()
                         .background(Color.Red)
                 ) {
-                    //Background for the swipe
+                    //Content for area behind swipe.
+                    Text(text = "HELLO")
                 }
             },
             dismissContent = {
@@ -133,15 +144,92 @@ fun SwipeToDismissExample() {
                 ) {
                     Box(
                         Modifier
-                            .fillMaxWidth()
-                            .height(Dp(100f))
+                            .fillMaxSize()
                             .background(Color.LightGray),
                         contentAlignment = Alignment.Center
                     ) {
+                        //Content of swipe itself.
                         Text("Swipe me to dismiss", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
         )
     }
+}
+
+
+@Composable
+fun AngledSwipeToDismissSimplified() {
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+    var rotation by remember { mutableStateOf(0f) }
+    var isDismissed by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    if (!isDismissed) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(400.dp)
+                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                    .rotate(rotation)
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            offsetX += dragAmount.x
+                            offsetY += dragAmount.y
+                            rotation = calculateRotation(offsetX)
+                        }
+                    }
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDrag = { change: PointerInputChange, dragAmount: Offset -> // Correct onDrag lambda
+                                change.consume()
+                                offsetX += dragAmount.x
+                                offsetY += dragAmount.y
+                                rotation = calculateRotation(offsetX) },
+                                onDragEnd = {
+                                val threshold = 500f
+                                if (offsetX > threshold || offsetX < -threshold || offsetY > threshold || offsetY < -threshold) {
+                                    isDismissed = true
+                                } else {
+                                    coroutineScope.launch {
+                                        // Animate back to original position (Simplified)
+                                        val animSpec = tween<Float>(durationMillis = 300)
+                                        launch {
+                                            animate(initialValue = offsetX, targetValue = 0f, animationSpec = animSpec) { value, _ -> offsetX = value }
+                                        }
+                                        launch {
+                                            animate(initialValue = offsetY, targetValue = 0f, animationSpec = animSpec) { value, _ -> offsetY = value }
+                                        }
+                                        launch {
+                                            animate(initialValue = rotation, targetValue = 0f, animationSpec = animSpec) { value, _ -> rotation = value }
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    },
+                backgroundColor = Color.LightGray
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Swipe Me!", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+    }
+}
+
+private fun calculateRotation(offsetX: Float): Float {
+    val maxRotation = 15f
+    return (offsetX / 500f) * maxRotation
 }
