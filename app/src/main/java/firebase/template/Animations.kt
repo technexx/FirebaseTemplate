@@ -50,6 +50,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import firebase.template.ui.theme.Note
+import firebase.template.ui.theme.TestData
+import firebase.template.ui.theme.TestData.Companion.noteList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -284,7 +287,7 @@ fun SwipeToDismissExample() {
 
 
 @Composable
-fun AngledSwipeToDismissSimplified() {
+fun NoteSwiper(emptyList: MutableList<Note>) {
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
     var rotation by remember { mutableStateOf(0f) }
@@ -318,7 +321,8 @@ fun AngledSwipeToDismissSimplified() {
                                 change.consume()
                                 offsetX += dragAmount.x
                                 offsetY += dragAmount.y
-                                rotation = calculateRotation(offsetX) },
+                                rotation = calculateRotation(offsetX)
+                            },
                             onDragEnd = {
                                 val threshold = 500f
                                 if (offsetX > threshold || offsetX < -threshold || offsetY > threshold || offsetY < -threshold) {
@@ -328,13 +332,25 @@ fun AngledSwipeToDismissSimplified() {
                                         // Animate back to original position
                                         val animSpec = tween<Float>(durationMillis = 300)
                                         launch {
-                                            animate(initialValue = offsetX, targetValue = 0f, animationSpec = animSpec) { value, _ -> offsetX = value }
+                                            animate(
+                                                initialValue = offsetX,
+                                                targetValue = 0f,
+                                                animationSpec = animSpec
+                                            ) { value, _ -> offsetX = value }
                                         }
                                         launch {
-                                            animate(initialValue = offsetY, targetValue = 0f, animationSpec = animSpec) { value, _ -> offsetY = value }
+                                            animate(
+                                                initialValue = offsetY,
+                                                targetValue = 0f,
+                                                animationSpec = animSpec
+                                            ) { value, _ -> offsetY = value }
                                         }
                                         launch {
-                                            animate(initialValue = rotation, targetValue = 0f, animationSpec = animSpec) { value, _ -> rotation = value }
+                                            animate(
+                                                initialValue = rotation,
+                                                targetValue = 0f,
+                                                animationSpec = animSpec
+                                            ) { value, _ -> rotation = value }
                                         }
                                     }
                                 }
@@ -346,7 +362,7 @@ fun AngledSwipeToDismissSimplified() {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Swipe Me!", style = MaterialTheme.typography.bodyMedium)
+
                 }
             }
         }

@@ -29,30 +29,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainSurface {
-                        AnimatedTransitionDialog(modifier = Modifier
-                            .background(Color.Transparent)
-                            .fillMaxSize(),
-                            onDismissRequest = {
-                        },
-                            content = {
-                                Surface(
-                                    shape = RoundedCornerShape(16.dp),
-                                    color = colorResource(R.color.white)
-                                ) {
-                                    Box(modifier = Modifier
-                                    ) {
-                                        Column(modifier = Modifier
-                                            .fillMaxSize(),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.SpaceBetween)
-                                        {
-                                            AngledSwipeToDismissSimplified()
-//                                            SwipeToDismissExample()
-                                        }
-                                    }
-                                }
-                            }
-                        )
+
                     }
                 }
             }
