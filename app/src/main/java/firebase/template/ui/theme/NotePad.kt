@@ -28,11 +28,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import firebase.template.AnimatedComposable
 import firebase.template.R
 import firebase.template.RegText
 import firebase.template.ui.theme.TestData.Companion.noteList
 
-class NotePad {
+class NotePad(private val viewModel: ViewModel) {
     @Composable
     fun NoteBoard() {
         Box(modifier = Modifier
@@ -94,13 +96,18 @@ class NotePad {
 
     @Composable
     fun AddButton(modifier: Modifier = Modifier) {
+        val currentScreen = viewModel.noteList.collectAsStateWithLifecycle()
+
         Box() {
-            OutlinedButton(onClick = { /*TODO*/ },
+            OutlinedButton(
+                onClick = {
+                    viewModel.updateCurrentScreen(1)
+                },
                 modifier = modifier,
                 shape = CircleShape,
-                border= BorderStroke(2.dp, Color.Blue),
+                border = BorderStroke(4.dp, Color.Blue),
                 contentPadding = PaddingValues(0.dp),  //avoid the little icon
-                colors = ButtonDefaults.outlinedButtonColors(contentColor =  Color.White),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
             ) {
                 Icon(Icons.Default.Add, contentDescription = "content description")
             }

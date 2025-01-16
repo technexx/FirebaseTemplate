@@ -12,11 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import firebase.template.ui.theme.FirebaseTemplateTheme
 import firebase.template.ui.theme.NotePad
+import firebase.template.ui.theme.ViewModel
+
+private lateinit var viewModel : ViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        viewModel = ViewModel()
         val notePad = NotePad()
 
         setContent {
@@ -26,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainSurface {
-                        notePad.NoteBoard()
+                        notePad.NoteBoard(viewModel)
                     }
                 }
             }
