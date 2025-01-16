@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         viewModel = ViewModel()
-        val notePad = NotePad()
+        val notePad = NotePad(viewModel)
 
         setContent {
             FirebaseTemplateTheme {
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainSurface {
-                        notePad.NoteBoard(viewModel)
+                        notePad.NoteBoard()
                     }
                 }
             }

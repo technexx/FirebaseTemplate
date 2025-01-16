@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
@@ -21,13 +23,24 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import firebase.template.AnimatedComposable
 import firebase.template.R
@@ -37,13 +50,16 @@ import firebase.template.ui.theme.TestData.Companion.noteList
 class NotePad(private val viewModel: ViewModel) {
     @Composable
     fun NoteBoard() {
+        val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
+
         Box(modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.grey_400))
         )
         {
             Column {
-                NoteCards()
+                if (currentScreen.value == viewModel.NOTE_LIST) NoteCards()
+                if (currentScreen.value == viewModel.ADD_NOTE) AddNoteScreen()
                 Spacer(modifier = Modifier.weight(1f))
                 Row(modifier = Modifier
                     .fillMaxWidth(),
@@ -96,12 +112,10 @@ class NotePad(private val viewModel: ViewModel) {
 
     @Composable
     fun AddButton(modifier: Modifier = Modifier) {
-        val currentScreen = viewModel.noteList.collectAsStateWithLifecycle()
-
         Box() {
             OutlinedButton(
                 onClick = {
-                    viewModel.updateCurrentScreen(1)
+                    viewModel.updateCurrentScreen(viewModel.ADD_NOTE)
                 },
                 modifier = modifier,
                 shape = CircleShape,
@@ -112,5 +126,33 @@ class NotePad(private val viewModel: ViewModel) {
                 Icon(Icons.Default.Add, contentDescription = "content description")
             }
         }
+    }
+
+    @Composable
+    fun AddNoteScreen() {
+        var txtField by remember { mutableStateOf("") }
+
+        AnimatedComposable(
+            backHandler = {
+                viewModel.updateCurrentScreen(viewModel.NOTE_LIST)
+            }
+        ) {
+            Column {
+                Row() {
+                    TextField(modifier = Modifier,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                        value = txtField,
+                        placeholder = { Text( "Add a note!") },
+                        onValueChange = {
+
+                        },
+                        singleLine = true,
+                        textStyle = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                        colors = OutlinedTextFieldDefaults.colors(Color.Black)
+                    )
+                }
+            }
+        }
+
     }
 }
