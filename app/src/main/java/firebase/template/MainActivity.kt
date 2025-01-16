@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainSurface {
-                        notePad.NoteCards()
+                        notePad.NoteBoard()
                     }
                 }
             }
