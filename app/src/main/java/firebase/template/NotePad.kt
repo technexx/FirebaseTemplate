@@ -48,10 +48,11 @@ class NotePad(private val viewModel: ViewModel) {
     @Composable
     fun NoteBoard() {
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
+        val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
 
         Box(modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground))
+            .background(colorResource(id = colorTheme.value.notePadBackground))
         )
         {
             Column {
@@ -133,6 +134,7 @@ class NotePad(private val viewModel: ViewModel) {
     @Composable
     fun AddNoteScreen() {
         var txtField by remember { mutableStateOf("") }
+        val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
 
         AnimatedComposable(
             backHandler = {
@@ -141,7 +143,7 @@ class NotePad(private val viewModel: ViewModel) {
         ) {
             Column(modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource (id = Theme.themeColorsList[0].notePadBackground))) {
+                .background(colorResource(id = Theme.themeColorsList[0].notePadBackground))) {
 
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
@@ -151,14 +153,14 @@ class NotePad(private val viewModel: ViewModel) {
 
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
-                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
+                        focusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
+                        unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         focusedPlaceholderColor = Color.Transparent,
-                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldUnFocusedPlaceHolderTextColor),
+                        unfocusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
                     )
                 )
 
@@ -170,15 +172,15 @@ class NotePad(private val viewModel: ViewModel) {
 
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
 
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
-                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
+                        focusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
+                        unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         focusedPlaceholderColor = Color.Transparent,
-                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldUnFocusedPlaceHolderTextColor),
+                        unfocusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
                     )
                 )
             }
