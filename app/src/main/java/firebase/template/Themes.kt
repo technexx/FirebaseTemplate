@@ -10,6 +10,9 @@ class Themes {
     companion object {
         data class ColorTheme(
             val notePadBackground: Int,
+            val textFieldColor: Int,
+            val textFieldUnFocusedPlaceHolderTextColor: Int,
+            val textFieldFocusedPlaceHolderTextColor: Int,
         )
 
     }
@@ -23,11 +26,17 @@ object Theme {
         //Light
         Themes.Companion.ColorTheme(
             notePadBackground = R.color.grey_400,
+            textFieldColor = R.color.black,
+            textFieldUnFocusedPlaceHolderTextColor = R.color.black,
+            textFieldFocusedPlaceHolderTextColor = R.color.white
         ),
 
         //Dark
         Themes.Companion.ColorTheme(
-            notePadBackground = R.color.black
+            notePadBackground = R.color.black,
+            textFieldColor = R.color.white,
+            textFieldUnFocusedPlaceHolderTextColor = R.color.white,
+            textFieldFocusedPlaceHolderTextColor = R.color.black
         )
     )
 }

@@ -151,8 +151,10 @@ class NotePad(private val viewModel: ViewModel) {
 
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.Bold),
-                    colors = OutlinedTextFieldDefaults.colors(Color.Black)
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor),
+                        )
                 )
 
                 TextField(modifier = Modifier,
@@ -163,12 +165,13 @@ class NotePad(private val viewModel: ViewModel) {
 
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
 
                     colors = TextFieldDefaults.colors(
                         unfocusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor),
                     )
                 )
             }
