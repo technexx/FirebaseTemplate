@@ -22,7 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,7 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import firebase.template.TestData.Companion.noteList
-import firebase.template.Theme.LIGHT
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class NotePad(private val viewModel: ViewModel) {
     @Composable
@@ -133,11 +133,14 @@ class NotePad(private val viewModel: ViewModel) {
 
     @Composable
     fun AddNoteScreen() {
-        var txtField by remember { mutableStateOf("") }
+        var titleTxtField by remember { mutableStateOf("") }
+        var bodyTxtField by remember { mutableStateOf("") }
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
 
         AnimatedComposable(
             backHandler = {
+                val newNote = Note(titleTxtField, bodyTxtField, dateTime())
+                viewModel.addToNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
             }
         ) {
@@ -147,10 +150,10 @@ class NotePad(private val viewModel: ViewModel) {
 
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    value = txtField,
+                    value = titleTxtField,
                     placeholder = { Text( "Add a note!") },
                     onValueChange = {
-                        txtField = it
+                        titleTxtField = it
                     },
                     singleLine = true,
                     textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
@@ -166,10 +169,10 @@ class NotePad(private val viewModel: ViewModel) {
 
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    value = txtField,
+                    value = bodyTxtField,
                     placeholder = { Text( "Add a note!") },
-                    onValueChange = {
-
+                    onValueChange = { 
+                        bodyTxtField = it           
                     },
                     singleLine = true,
                     textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
@@ -187,16 +190,9 @@ class NotePad(private val viewModel: ViewModel) {
         }
     }
 
-    @Composable
-    fun addNewNote(note: Note) {
-        var noteList = viewModel.noteList.collectAsStateWithLifecycle()
-
-        viewModel.addToNoteList(note)
-    }
-
-    @Composable
-    fun editNote(index: Int) {
-
+    private fun dateTime(): String {
+        val date = SimpleDateFormat.getDateInstance()
+        return date.format(Date())
     }
 }
 
