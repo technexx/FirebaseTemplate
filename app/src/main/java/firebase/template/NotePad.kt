@@ -152,9 +152,14 @@ class NotePad(private val viewModel: ViewModel) {
                     },
                     singleLine = true,
                     textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor),
-                        )
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
+                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedPlaceholderColor = Color.Transparent,
+                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldUnFocusedPlaceHolderTextColor),
+                    )
                 )
 
                 TextField(modifier = Modifier,
@@ -168,10 +173,12 @@ class NotePad(private val viewModel: ViewModel) {
                     textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
 
                     colors = TextFieldDefaults.colors(
+                        focusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
                         unfocusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldColor),
+                        focusedPlaceholderColor = Color.Transparent,
+                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[LIGHT].textFieldUnFocusedPlaceHolderTextColor),
                     )
                 )
             }
