@@ -28,7 +28,7 @@ class ViewModel : ViewModel() {
         val noteList = getNoteList
         val newList = SnapshotStateList<Note>()
         newList.addAll(noteList)
-        newList.addAll(noteList)
+        newList.add(note)
         updateNoteList(newList)
     }
 

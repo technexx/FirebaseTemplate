@@ -1,5 +1,6 @@
 package firebase.template
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -139,9 +140,13 @@ class NotePad(private val viewModel: ViewModel) {
 
         AnimatedComposable(
             backHandler = {
+                if (titleTxtField.isBlank()) titleTxtField = "Untitled"
                 val newNote = Note(titleTxtField, bodyTxtField, dateTime())
                 viewModel.addToNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+
+                Log.i("noteList", "note added is $newNote")
+                Log.i("noteList", viewModel.getNoteList.toString())
             }
         ) {
             Column(modifier = Modifier
