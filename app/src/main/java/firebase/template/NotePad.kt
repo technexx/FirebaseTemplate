@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import firebase.template.TestData.Companion.noteList
+import firebase.template.Theme.LIGHT
 
 class NotePad(private val viewModel: ViewModel) {
     @Composable
@@ -49,7 +51,7 @@ class NotePad(private val viewModel: ViewModel) {
 
         Box(modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.grey_400))
+            .background(colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground))
         )
         {
             Column {
@@ -139,22 +141,39 @@ class NotePad(private val viewModel: ViewModel) {
         ) {
             Column(modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Blue)) {
-                Row() {
-                    TextField(modifier = Modifier,
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                        value = txtField,
-                        placeholder = { Text( "Add a note!") },
-                        onValueChange = {
+                .background(colorResource (id = Theme.themeColorsList[0].notePadBackground))) {
 
-                        },
-                        singleLine = true,
-                        textStyle = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.Bold),
-                        colors = OutlinedTextFieldDefaults.colors(Color.Black)
+                TextField(modifier = Modifier,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    value = txtField,
+                    placeholder = { Text( "Add a note!") },
+                    onValueChange = {
+
+                    },
+                    singleLine = true,
+                    textStyle = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    colors = OutlinedTextFieldDefaults.colors(Color.Black)
+                )
+
+                TextField(modifier = Modifier,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    value = txtField,
+                    placeholder = { Text( "Add a note!") },
+                    onValueChange = {
+
+                    },
+                    singleLine = true,
+                    textStyle = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.Bold),
+
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[LIGHT].notePadBackground),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
                     )
-                }
+                )
             }
         }
 
     }
 }
+
