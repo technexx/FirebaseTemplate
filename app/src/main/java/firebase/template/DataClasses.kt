@@ -1,4 +1,4 @@
-package firebase.template.ui.theme
+package firebase.template
 
 data class Note(
     var title: String,

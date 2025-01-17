@@ -1,4 +1,4 @@
-package firebase.template.ui.theme
+package firebase.template
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
@@ -26,7 +25,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,10 +40,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import firebase.template.AnimatedComposable
-import firebase.template.R
-import firebase.template.RegText
-import firebase.template.ui.theme.TestData.Companion.noteList
+import firebase.template.TestData.Companion.noteList
 
 class NotePad(private val viewModel: ViewModel) {
     @Composable
@@ -58,14 +53,19 @@ class NotePad(private val viewModel: ViewModel) {
         )
         {
             Column {
-                if (currentScreen.value == viewModel.NOTE_LIST) NoteCards()
-                if (currentScreen.value == viewModel.ADD_NOTE) AddNoteScreen()
-                Spacer(modifier = Modifier.weight(1f))
-                Row(modifier = Modifier
-                    .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End) {
-                    AddButton(modifier = Modifier
-                        .size(50.dp))
+                if (currentScreen.value == viewModel.NOTE_LIST) {
+                    NoteCards()
+                    Spacer(modifier = Modifier.weight(1f))
+                    Row(modifier = Modifier
+                        .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End) {
+                        AddButton(modifier = Modifier
+                            .size(50.dp))
+                    }
+                }
+
+                if (currentScreen.value == viewModel.ADD_NOTE) {
+                    AddNoteScreen()
                 }
             }
         }
@@ -137,7 +137,9 @@ class NotePad(private val viewModel: ViewModel) {
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST)
             }
         ) {
-            Column {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Blue)) {
                 Row() {
                     TextField(modifier = Modifier,
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),

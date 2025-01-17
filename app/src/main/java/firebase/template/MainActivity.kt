@@ -11,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import firebase.template.ui.theme.FirebaseTemplateTheme
-import firebase.template.ui.theme.NotePad
-import firebase.template.ui.theme.ViewModel
 
 private lateinit var viewModel : ViewModel
 

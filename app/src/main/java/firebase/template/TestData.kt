@@ -1,7 +1,8 @@
-package firebase.template.ui.theme
+package firebase.template
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import firebase.template.Note
 
 class TestData {
     companion object {

@@ -1,6 +1,7 @@
-package firebase.template.ui.theme
+package firebase.template
 
 import androidx.lifecycle.ViewModel
+import firebase.template.Note
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
