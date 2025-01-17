@@ -12,12 +12,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -153,7 +156,12 @@ fun DropDownItemUi(
     )
 }
 
-@Composable
-fun TextField() {
-
-}
+//@Composable
+//fun TextField(
+//    textColor: Color,
+//    fontSize: Int = 22,
+//    fontWeight: FontWeight = FontWeight.Normal,
+//    textStyle: TextStyle = TextStyle(textColor, fontSize = fontSize.sp, fontWeight = fontWeight),
+//) {
+//
+//}

@@ -56,7 +56,7 @@ class NotePad(private val viewModel: ViewModel) {
         )
         {
             Column {
-                if (currentScreen.value == viewModel.NOTE_LIST) {
+                if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
                     NoteCards()
                     Spacer(modifier = Modifier.weight(1f))
                     Row(modifier = Modifier
@@ -67,7 +67,7 @@ class NotePad(private val viewModel: ViewModel) {
                     }
                 }
 
-                if (currentScreen.value == viewModel.ADD_NOTE) {
+                if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
                     AddNoteScreen()
                 }
             }
@@ -118,7 +118,7 @@ class NotePad(private val viewModel: ViewModel) {
         Box() {
             OutlinedButton(
                 onClick = {
-                    viewModel.updateCurrentScreen(viewModel.ADD_NOTE)
+                    viewModel.updateCurrentScreen(viewModel.ADD_NOTE_SCREEN)
                 },
                 modifier = modifier,
                 shape = CircleShape,
@@ -138,7 +138,7 @@ class NotePad(private val viewModel: ViewModel) {
 
         AnimatedComposable(
             backHandler = {
-                viewModel.updateCurrentScreen(viewModel.NOTE_LIST)
+                viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
             }
         ) {
             Column(modifier = Modifier
@@ -150,7 +150,7 @@ class NotePad(private val viewModel: ViewModel) {
                     value = txtField,
                     placeholder = { Text( "Add a note!") },
                     onValueChange = {
-
+                        txtField = it
                     },
                     singleLine = true,
                     textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
@@ -185,6 +185,17 @@ class NotePad(private val viewModel: ViewModel) {
                 )
             }
         }
+    }
+
+    @Composable
+    fun addNewNote(note: Note) {
+        var noteList = viewModel.noteList.collectAsStateWithLifecycle()
+
+        viewModel.addToNoteList(note)
+    }
+
+    @Composable
+    fun editNote(index: Int) {
 
     }
 }
