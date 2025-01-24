@@ -1,7 +1,9 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.gms.google-services")
+    id ("com.google.devtools.ksp")
+//    id("com.google.dagger.hilt.android")
+//    id("kotlin-kapt")
 }
 
 android {
@@ -41,7 +43,8 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+//        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     packaging {
         resources {
@@ -74,4 +77,12 @@ dependencies {
     implementation("androidx.compose.material:material:1.7.6") // Or latest
     implementation("androidx.compose.ui:ui:1.7.6") // Or latest
     implementation("androidx.compose.foundation:foundation:1.7.6")
+
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+
+    implementation ("com.google.maps.android:android-maps-utils:0.5")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
 }

@@ -1,5 +1,8 @@
 package firebase.template
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,16 +13,32 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.room.Room
+import firebase.template.Database.NotesDatabase
 import firebase.template.ui.theme.FirebaseTemplateTheme
 
+@SuppressLint("StaticFieldLeak")
+private lateinit var activity: Activity
+@SuppressLint("StaticFieldLeak")
+private lateinit var appContext : Context
 private lateinit var viewModel : ViewModel
+private lateinit var noteDatabase: NotesDatabase.AppDatabase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        activity = this@MainActivity
+        appContext = applicationContext
+
         viewModel = ViewModel()
         val notePad = NotePad(viewModel)
+
+        noteDatabase = Room.databaseBuilder(
+            appContext,
+            NotesDatabase.AppDatabase::class.java,
+            "notes-database"
+        ).build()
 
         setContent {
             FirebaseTemplateTheme {

@@ -146,7 +146,7 @@ class NotePad(private val viewModel: ViewModel) {
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
                 Log.i("noteList", "note added is $newNote")
-                Log.i("noteList", viewModel.getNoteList.toString())
+                Log.i("noteList", "note list is ${viewModel.getNoteList}")
             }
         ) {
             Column(modifier = Modifier

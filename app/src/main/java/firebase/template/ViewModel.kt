@@ -20,7 +20,7 @@ class ViewModel : ViewModel() {
     private val _colorTheme = MutableStateFlow(Theme.themeColorsList[0])
     val colorTheme: StateFlow<Themes.Companion.ColorTheme> = _colorTheme.asStateFlow()
 
-    fun updateNoteList(note: List<Note>) {
+    private fun updateNoteList(note: List<Note>) {
         _noteList.value = note
     }
 
