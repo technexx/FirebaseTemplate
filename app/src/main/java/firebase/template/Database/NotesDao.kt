@@ -15,7 +15,7 @@ interface NotesDao {
     fun getAllNotesById(userIds:IntArray):List<NoteData>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertCuisine(vararg notes_data:NoteData)
+    fun insertNote(vararg notes_data:NoteData)
 
     @Update
     fun updateNotes(cuisine:NoteData)

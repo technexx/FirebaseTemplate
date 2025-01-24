@@ -23,6 +23,7 @@ private lateinit var activity: Activity
 private lateinit var appContext : Context
 private lateinit var viewModel : ViewModel
 private lateinit var noteDatabase: NotesDatabase.AppDatabase
+private lateinit var roomInteractions: RoomInteractions
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,13 +33,15 @@ class MainActivity : ComponentActivity() {
         appContext = applicationContext
 
         viewModel = ViewModel()
-        val notePad = NotePad(viewModel)
 
         noteDatabase = Room.databaseBuilder(
             appContext,
             NotesDatabase.AppDatabase::class.java,
             "notes-database"
         ).build()
+
+        roomInteractions = RoomInteractions(viewModel, noteDatabase)
+        val notePad = NotePad(viewModel, roomInteractions)
 
         setContent {
             FirebaseTemplateTheme {

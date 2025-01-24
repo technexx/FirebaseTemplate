@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,10 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import firebase.template.TestData.Companion.noteList
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class NotePad(private val viewModel: ViewModel) {
+class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
     @Composable
     fun NoteBoard() {
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
@@ -136,6 +138,7 @@ class NotePad(private val viewModel: ViewModel) {
     fun AddNoteScreen() {
         var titleTxtField by remember { mutableStateOf("") }
         var bodyTxtField by remember { mutableStateOf("") }
+        val coroutineScope = rememberCoroutineScope()
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
 
         AnimatedComposable(
@@ -144,6 +147,11 @@ class NotePad(private val viewModel: ViewModel) {
                 val newNote = Note(titleTxtField, bodyTxtField, dateTime())
                 viewModel.addToNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+
+                coroutineScope.launch {
+//                    roomInteraction.insertNoteIntoDatabase(newNote)
+                    Log.i("noteList", "database is ${roomInteraction.getAllNotesFromDatabase()}")
+                }
 
                 Log.i("noteList", "note added is $newNote")
                 Log.i("noteList", "note list is ${viewModel.getNoteList}")
