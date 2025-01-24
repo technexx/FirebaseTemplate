@@ -156,13 +156,14 @@ class NotePad(private val viewModel: ViewModel) {
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     value = titleTxtField,
-                    placeholder = { Text( "Add a note!") },
+                    placeholder = { Text( "Add a title!") },
                     onValueChange = {
                         titleTxtField = it
                     },
                     singleLine = true,
                     textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
                     colors = TextFieldDefaults.colors(
+                        cursorColor = colorResource(id = colorTheme.value.textFieldCursorColor),
                         focusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
@@ -183,6 +184,7 @@ class NotePad(private val viewModel: ViewModel) {
                     textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
 
                     colors = TextFieldDefaults.colors(
+                        cursorColor = colorResource(id = colorTheme.value.textFieldCursorColor),
                         focusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
