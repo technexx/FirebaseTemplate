@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import firebase.template.Database.NoteData
 import firebase.template.TestData.Companion.noteList
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -141,6 +142,10 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val coroutineScope = rememberCoroutineScope()
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
 
+        coroutineScope.launch {
+            roomInteraction.noteListFromDatabaseStorage()
+        }
+
         AnimatedComposable(
             backHandler = {
                 if (titleTxtField.isBlank()) titleTxtField = "Untitled"
@@ -149,8 +154,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
                 coroutineScope.launch {
-//                    roomInteraction.insertNoteIntoDatabase(newNote)
-                    Log.i("noteList", "database is ${roomInteraction.getAllNotesFromDatabase()}")
+                    val databaseNote = NoteData(null, newNote.title, newNote.body, newNote.lastEdited)
+                    roomInteraction.insertNoteIntoDatabase(databaseNote)
                 }
 
                 Log.i("noteList", "note added is $newNote")
