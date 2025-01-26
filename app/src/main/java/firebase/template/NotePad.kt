@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import firebase.template.Database.NoteData
 import firebase.template.TestData.Companion.noteList
+import firebase.template.ui.theme.showPlaceHolderTextIfFieldIsEmpty
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -169,7 +170,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     value = titleTxtField,
-                    placeholder = { Text( "Add a title!") },
+                    placeholder = {
+                        Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Title")) },
                     onValueChange = {
                         titleTxtField = it
                     },
@@ -181,7 +183,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        focusedPlaceholderColor = Color.Transparent,
+                        focusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
                         unfocusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
                     )
                 )
@@ -189,9 +191,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     value = bodyTxtField,
-                    placeholder = { Text( "Add a note!") },
-                    onValueChange = { 
-                        bodyTxtField = it           
+                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Note")) },
+                    onValueChange = {
+                        bodyTxtField = it
                     },
                     singleLine = true,
                     textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
@@ -202,7 +204,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        focusedPlaceholderColor = Color.Transparent,
+                        focusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
                         unfocusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
                     )
                 )
