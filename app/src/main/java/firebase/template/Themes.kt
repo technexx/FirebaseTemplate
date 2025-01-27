@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 class Themes {
     companion object {
         data class ColorTheme(
+            val primaryColor: Int,
             val notePadBackground: Int,
             val textFieldColor: Int,
             val textFieldCursorColor: Int,
@@ -25,6 +26,7 @@ object Theme {
     val themeColorsList: SnapshotStateList<Themes.Companion.ColorTheme> = mutableStateListOf(
         //Light
         Themes.Companion.ColorTheme(
+            primaryColor = R.color.black,
             notePadBackground = R.color.grey_400,
             textFieldColor = R.color.black,
             textFieldCursorColor = R.color.black,
@@ -33,6 +35,7 @@ object Theme {
 
         //Dark
         Themes.Companion.ColorTheme(
+            primaryColor = R.color.white,
             notePadBackground = R.color.black,
             textFieldColor = R.color.white,
             textFieldCursorColor = R.color.white,
