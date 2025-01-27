@@ -9,7 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class RoomInteractions(viewModel: ViewModel, notesDatabase: NotesDatabase.AppDatabase) {
+class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDatabase.AppDatabase) {
     val notesDao = notesDatabase.notesDao()
 
     suspend fun insertNoteIntoDatabase(noteData: NoteData) {
@@ -35,8 +35,14 @@ class RoomInteractions(viewModel: ViewModel, notesDatabase: NotesDatabase.AppDat
             noteHolder.add(Note(i.title, i.body, i.lastEdited))
         }
 
-        Log.i("noteList", "note list from db is $noteHolder")
-
         return noteHolder
+    }
+
+    suspend fun populateLocalNoteListFromDatabase() {
+        val localList = mutableListOf<Note>()
+        for (i in noteListFromDatabaseStorage()) {
+            localList.add(Note(i.title, i.body, i.lastEdited))
+        }
+        viewModel.updateLocalNoteList(localList)
     }
 }

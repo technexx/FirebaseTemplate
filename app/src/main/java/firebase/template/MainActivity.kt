@@ -16,11 +16,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.room.Room
 import firebase.template.Database.NotesDatabase
 import firebase.template.ui.theme.FirebaseTemplateTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @SuppressLint("StaticFieldLeak")
 private lateinit var activity: Activity
 @SuppressLint("StaticFieldLeak")
 private lateinit var appContext : Context
+val ioScope = CoroutineScope(Job() + Dispatchers.IO)
 private lateinit var viewModel : ViewModel
 private lateinit var noteDatabase: NotesDatabase.AppDatabase
 private lateinit var roomInteractions: RoomInteractions
@@ -42,6 +47,10 @@ class MainActivity : ComponentActivity() {
 
         roomInteractions = RoomInteractions(viewModel, noteDatabase)
         val notePad = NotePad(viewModel, roomInteractions)
+
+        ioScope.launch {
+            roomInteractions.populateLocalNoteListFromDatabase()
+        }
 
         setContent {
             FirebaseTemplateTheme {

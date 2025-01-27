@@ -83,9 +83,10 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @Composable
     fun NoteCards() {
         val coroutineScope = rememberCoroutineScope()
-        val testData = TestData()
-        var noteListFromDatabase: List<Note> = mutableStateListOf()
+        val localNoteList = viewModel.noteList.collectAsStateWithLifecycle()
+        var noteListFromDatabase: List<Note> = emptyList()
 
+        //TODO: Update local list and database, but use local list to populate.
         coroutineScope.launch {
             noteListFromDatabase = roomInteraction.noteListFromDatabaseStorage()
         }
@@ -95,9 +96,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 .padding(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ){
-            items (noteListFromDatabase.size) { index ->
-                NoteText(noteListFromDatabase, index)
+            items (localNoteList.value.size) { index ->
+                NoteText(localNoteList.value, index)
             }
+//            items (noteListFromDatabase.size) { index ->
+//                NoteText(noteListFromDatabase, index)
+//            }
         }
     }
 
@@ -157,7 +161,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             backHandler = {
                 if (titleTxtField.isBlank()) titleTxtField = "Untitled"
                 val newNote = Note(titleTxtField, bodyTxtField, dateTime())
-                viewModel.addToNoteList(newNote)
+                viewModel.addToLocalNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
                 coroutineScope.launch {
