@@ -15,8 +15,6 @@ class RoomInteractions(viewModel: ViewModel, notesDatabase: NotesDatabase.AppDat
     suspend fun insertNoteIntoDatabase(noteData: NoteData) {
         withContext(Dispatchers.IO) {
             notesDao.insertNote(noteData)
-            Log.i("noteList", "database is ${getAllNotesFromDatabase()}")
-
         }
     }
 
@@ -29,7 +27,7 @@ class RoomInteractions(viewModel: ViewModel, notesDatabase: NotesDatabase.AppDat
         return noteList
     }
 
-    suspend fun noteListFromDatabaseStorage() {
+    suspend fun noteListFromDatabaseStorage(): List<Note> {
         val noteHolder = mutableListOf<Note>()
 
         val dbContents = getAllNotesFromDatabase()
@@ -37,6 +35,8 @@ class RoomInteractions(viewModel: ViewModel, notesDatabase: NotesDatabase.AppDat
             noteHolder.add(Note(i.title, i.body, i.lastEdited))
         }
 
-        Log.i("noteList", "db is $noteHolder")
+        Log.i("noteList", "note list from db is $noteHolder")
+
+        return noteHolder
     }
 }

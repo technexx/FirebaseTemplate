@@ -30,6 +30,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import firebase.template.Database.NoteData
-import firebase.template.TestData.Companion.noteList
 import firebase.template.ui.theme.showPlaceHolderTextIfFieldIsEmpty
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -82,13 +82,21 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     }
     @Composable
     fun NoteCards() {
+        val coroutineScope = rememberCoroutineScope()
+        val testData = TestData()
+        var noteListFromDatabase: List<Note> = mutableStateListOf()
+
+        coroutineScope.launch {
+            noteListFromDatabase = roomInteraction.noteListFromDatabaseStorage()
+        }
+
         LazyColumn (
             modifier = Modifier
                 .padding(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ){
-            items (TestData.noteList.size) { index ->
-                NoteText(noteList, index)
+            items (noteListFromDatabase.size) { index ->
+                NoteText(noteListFromDatabase, index)
             }
         }
     }
@@ -145,10 +153,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val coroutineScope = rememberCoroutineScope()
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
 
-        coroutineScope.launch {
-            roomInteraction.noteListFromDatabaseStorage()
-        }
-
         AnimatedComposable(
             backHandler = {
                 if (titleTxtField.isBlank()) titleTxtField = "Untitled"
@@ -160,9 +164,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     val databaseNote = NoteData(null, newNote.title, newNote.body, newNote.lastEdited)
                     roomInteraction.insertNoteIntoDatabase(databaseNote)
                 }
-
-                Log.i("noteList", "note added is $newNote")
-                Log.i("noteList", "note list is ${viewModel.getNoteList}")
             }
         ) {
             Column(modifier = Modifier
