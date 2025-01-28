@@ -5,3 +5,4 @@ data class Note(
     var body: String,
     var lastEdited: String
 )
+

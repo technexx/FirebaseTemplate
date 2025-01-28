@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDatabase.AppDatabase) {
-    val notesDao = notesDatabase.notesDao()
+    private val notesDao = notesDatabase.notesDao()
 
     suspend fun insertNoteIntoDatabase(noteData: NoteData) {
         withContext(Dispatchers.IO) {

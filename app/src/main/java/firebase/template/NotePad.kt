@@ -3,6 +3,7 @@ package firebase.template
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -86,7 +88,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val localNoteList = viewModel.noteList.collectAsStateWithLifecycle()
         var noteListFromDatabase: List<Note> = emptyList()
 
-        //TODO: Update local list and database, but use local list to populate.
         coroutineScope.launch {
             noteListFromDatabase = roomInteraction.noteListFromDatabaseStorage()
         }
@@ -99,16 +100,23 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             items (localNoteList.value.size) { index ->
                 NoteText(localNoteList.value, index)
             }
-//            items (noteListFromDatabase.size) { index ->
-//                NoteText(noteListFromDatabase, index)
-//            }
         }
     }
 
     @Composable
     fun NoteText(note: List<Note>, i: Int) {
+        var isLongPressed by remember { mutableStateOf(false) }
+
         Card(modifier = Modifier
-                .fillMaxSize(),
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = {
+                        isLongPressed = true
+                        Log.i("test", "long pressed")
+
+                    })
+            },
             colors = CardDefaults.cardColors(
                 containerColor = colorResource(id = R.color.grey_200),
             ),
