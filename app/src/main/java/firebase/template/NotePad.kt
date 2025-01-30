@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +62,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
         Box(modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = colorTheme.value.notePadBackground))
+            //This should recompose child composables.
+            .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground))
         )
         {
             Column {
@@ -92,14 +94,19 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             horizontalAlignment = Alignment.CenterHorizontally,
         ){
             items (localNoteList.value.size) { index ->
-                NoteText(localNoteList.value, index)
+                NoteContainer(localNoteList.value, index)
             }
         }
     }
 
+    //TODO: We don't want multiple recompositions if  state changes.
     @Composable
-    fun NoteText(note: List<NoteContents>, i: Int) {
+    fun NoteContainer(note: List<NoteContents>, i: Int) {
         var isLongPressed by remember { mutableStateOf(false) }
+
+        val backgroundColor = Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground
+        val borderColor = Theme.themeColorsList[viewModel.getColorTheme].noteBorder
+        val textColor = Theme.themeColorsList[viewModel.getColorTheme].noteText
 
         Card(modifier = Modifier
             .fillMaxSize()
@@ -110,14 +117,15 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         //Long press should trigger edit mode and highlight only note selected. Further highlights will be regular presses.
                         if (viewModel.getSelectedNoteList.isEmpty()) {
                             viewModel.addToSelectedNoteList(viewModel.getLocalNoteList[i])
+                            viewModel.updateNoteEditMode(true)
                         }
                         Log.i("test", "selected note list post add is ${viewModel.getSelectedNoteList}")
                     })
             },
             colors = CardDefaults.cardColors(
-                containerColor = colorResource(id = R.color.grey_200),
+                containerColor = colorResource(id = backgroundColor),
             ),
-            border = BorderStroke(2.dp, Color.Black),
+            border = BorderStroke(2.dp, colorResource(borderColor)),
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 5.dp
             ),
@@ -125,12 +133,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(6.dp)){
-                RegText(text = note[i].title, fontSize = 18, fontWeight = FontWeight.Bold)
-                RegText(text = note[i].body, fontSize = 15)
+                RegText(text = note[i].title, fontSize = 18, color = colorResource(textColor), fontWeight = FontWeight.Bold)
+                RegText(text = note[i].body, fontSize = 15, color = colorResource(textColor))
                 Row(modifier = Modifier
                     .fillMaxSize(),
                     horizontalArrangement = Arrangement.End) {
-                    RegText(text = note[i].lastEdited, fontSize = 15)
+                    RegText(text = note[i].lastEdited, fontSize = 15, color = colorResource(textColor))
                 }
             }
 
@@ -165,7 +173,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         AnimatedComposable(
             backHandler = {
                 if (titleTxtField.isBlank()) titleTxtField = "Untitled"
-                val newNote = NoteContents(titleTxtField, bodyTxtField, dateTime())
+                val newNote = NoteContents(titleTxtField, bodyTxtField, dateTime(),false)
                 viewModel.addToLocalNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
@@ -188,19 +196,19 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         titleTxtField = it
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
                     colors = TextFieldDefaults.colors(
-                        cursorColor = colorResource(id = colorTheme.value.textFieldCursorColor),
-                        focusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
-                        unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
+                        cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
+                        focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        focusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
-                        unfocusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
+                        focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
                     )
                 )
 
-                HorizontalDivider(color = colorResource(id = colorTheme.value.primaryColor), thickness = 2.dp)
+                HorizontalDivider(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].primaryColor), thickness = 2.dp)
 
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
@@ -210,16 +218,16 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         bodyTxtField = it
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = colorTheme.value.textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor), fontSize = 16.sp),
 
                     colors = TextFieldDefaults.colors(
-                        cursorColor = colorResource(id = colorTheme.value.textFieldCursorColor),
-                        focusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
-                        unfocusedContainerColor = colorResource(id = colorTheme.value.notePadBackground),
+                        cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
+                        focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        focusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
-                        unfocusedPlaceholderColor = colorResource(id = colorTheme.value.textFieldUnFocusedPlaceHolderTextColor),
+                        focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
                     )
                 )
             }
