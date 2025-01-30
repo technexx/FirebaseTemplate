@@ -27,21 +27,21 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         return noteList
     }
 
-    suspend fun noteListFromDatabaseStorage(): List<Note> {
-        val noteHolder = mutableListOf<Note>()
+    suspend fun noteListFromDatabaseStorage(): List<NoteContents> {
+        val noteHolder = mutableListOf<NoteContents>()
 
         val dbContents = getAllNotesFromDatabase()
         for (i in dbContents) {
-            noteHolder.add(Note(i.title, i.body, i.lastEdited))
+            noteHolder.add(NoteContents(i.title, i.body, i.lastEdited))
         }
 
         return noteHolder
     }
 
     suspend fun populateLocalNoteListFromDatabase() {
-        val localList = mutableListOf<Note>()
+        val localList = mutableListOf<NoteContents>()
         for (i in noteListFromDatabaseStorage()) {
-            localList.add(Note(i.title, i.body, i.lastEdited))
+            localList.add(NoteContents(i.title, i.body, i.lastEdited))
         }
         viewModel.updateLocalNoteList(localList)
     }

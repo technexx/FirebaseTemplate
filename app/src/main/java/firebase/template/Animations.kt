@@ -284,7 +284,7 @@ fun SwipeToDismissExample() {
 
 
 @Composable
-fun NoteSwiper(emptyList: MutableList<Note>) {
+fun NoteSwiper(emptyList: MutableList<NoteContents>) {
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
     var rotation by remember { mutableStateOf(0f) }

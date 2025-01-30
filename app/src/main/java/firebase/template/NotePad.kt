@@ -84,13 +84,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     }
     @Composable
     fun NoteCards() {
-        val coroutineScope = rememberCoroutineScope()
-        val localNoteList = viewModel.noteList.collectAsStateWithLifecycle()
-        var noteListFromDatabase: List<Note> = emptyList()
-
-        coroutineScope.launch {
-            noteListFromDatabase = roomInteraction.noteListFromDatabaseStorage()
-        }
+        val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
 
         LazyColumn (
             modifier = Modifier
@@ -104,7 +98,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     }
 
     @Composable
-    fun NoteText(note: List<Note>, i: Int) {
+    fun NoteText(note: List<NoteContents>, i: Int) {
         var isLongPressed by remember { mutableStateOf(false) }
 
         Card(modifier = Modifier
@@ -113,8 +107,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 detectTapGestures(
                     onLongPress = {
                         isLongPressed = true
-                        Log.i("test", "long pressed")
-
+                        //Long press should trigger edit mode and highlight only note selected. Further highlights will be regular presses.
+                        if (viewModel.getSelectedNoteList.isEmpty()) {
+                            viewModel.addToSelectedNoteList(viewModel.getLocalNoteList[i])
+                        }
+                        Log.i("test", "selected note list post add is ${viewModel.getSelectedNoteList}")
                     })
             },
             colors = CardDefaults.cardColors(
@@ -168,7 +165,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         AnimatedComposable(
             backHandler = {
                 if (titleTxtField.isBlank()) titleTxtField = "Untitled"
-                val newNote = Note(titleTxtField, bodyTxtField, dateTime())
+                val newNote = NoteContents(titleTxtField, bodyTxtField, dateTime())
                 viewModel.addToLocalNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
