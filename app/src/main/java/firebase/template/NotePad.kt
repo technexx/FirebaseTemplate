@@ -115,18 +115,16 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
         Card(modifier = Modifier
             .fillMaxSize()
-            .selectable(
-                selected = true,
-                onClick = {
-                    //If in edit mode and note clicked, highlight if not highlighted and vice-versa.
-                    Log.i("test", "edit mode is ${viewModel.getNoteEditMode}")
-                    if (viewModel.getNoteEditMode) {
-                        if (viewModel.getLocalNoteList[i].isHighlighted) viewModel.editLocalNoteListHighlight(i, false) else viewModel.editLocalNoteListHighlight(i, true)
-                    }
-                }
-            )
+            //TODO: .pointerInput overwriting .selectable
             .pointerInput(Unit) {
                 detectTapGestures(
+                    onTap = {
+                        //If in edit mode and note clicked, highlight if not highlighted and vice-versa.
+                        Log.i("test", "edit mode is ${viewModel.getNoteEditMode}")
+                        if (viewModel.getNoteEditMode) {
+                            if (viewModel.getLocalNoteList[i].isHighlighted) viewModel.editLocalNoteListHighlight(i, false) else viewModel.editLocalNoteListHighlight(i, true)
+                        }
+                },
                     onLongPress = {
                         isLongPressed = true
                         //Long press should trigger edit mode and highlight only note selected. Further highlights will be regular presses.
