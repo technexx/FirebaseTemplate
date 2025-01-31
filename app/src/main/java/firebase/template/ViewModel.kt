@@ -44,6 +44,28 @@ class ViewModel : ViewModel() {
         updateLocalNoteList(newList)
     }
 
+    fun editLocalNoteListTitle() {
+
+    }
+
+    fun editLocalNoteListBody() {
+
+    }
+
+    fun editLocalNoteListLastEdited() {
+
+    }
+
+    fun editLocalNoteListHighlight(index: Int, isHighlighted: Boolean) {
+        val noteList = getLocalNoteList.toMutableList()
+        var noteToReplace = noteList[index]
+        //Copy contents of note to edit, changing only highlight boolean.
+        noteToReplace = NoteContents(noteToReplace.title, noteToReplace.body, noteToReplace.lastEdited, isHighlighted)
+        //In our temporary note list, replace note in selected index before updating actual list.
+        noteList[index] = noteToReplace
+        updateLocalNoteList(noteList)
+    }
+
     fun updateLocalNoteList(note: List<NoteContents>) {
         _localNoteList.value = note
     }

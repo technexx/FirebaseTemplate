@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
@@ -57,13 +59,13 @@ import java.util.Date
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
     @Composable
     fun NoteBoard() {
-        val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
+        val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
 
         Box(modifier = Modifier
             .fillMaxSize()
             //This should recompose child composables.
-            .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground))
+            .background(colorResource(id = Theme.themeColorsList[colorTheme.value].defaultNoteBackground))
         )
         {
             Column {
@@ -99,17 +101,30 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         }
     }
 
-    //TODO: We don't want multiple recompositions if  state changes.
     @Composable
     fun NoteContainer(note: List<NoteContents>, i: Int) {
+        var colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
+        val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
+        var editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         var isLongPressed by remember { mutableStateOf(false) }
 
-        val backgroundColor = Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground
+        //For each note (card), have background color correspond to isHighlighted boolean from its data object.
+        val backgroundColor = if (!localNoteList.value[i].isHighlighted) Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground else Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
         val borderColor = Theme.themeColorsList[viewModel.getColorTheme].noteBorder
         val textColor = Theme.themeColorsList[viewModel.getColorTheme].noteText
 
         Card(modifier = Modifier
             .fillMaxSize()
+            .selectable(
+                selected = true,
+                onClick = {
+                    //If in edit mode and note clicked, highlight if not highlighted and vice-versa.
+                    Log.i("test", "edit mode is ${viewModel.getNoteEditMode}")
+                    if (viewModel.getNoteEditMode) {
+                        if (viewModel.getLocalNoteList[i].isHighlighted) viewModel.editLocalNoteListHighlight(i, false) else viewModel.editLocalNoteListHighlight(i, true)
+                    }
+                }
+            )
             .pointerInput(Unit) {
                 detectTapGestures(
                     onLongPress = {
@@ -117,10 +132,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         //Long press should trigger edit mode and highlight only note selected. Further highlights will be regular presses.
                         if (viewModel.getSelectedNoteList.isEmpty()) {
                             viewModel.addToSelectedNoteList(viewModel.getLocalNoteList[i])
+                            viewModel.editLocalNoteListHighlight(i, true)
                             viewModel.updateNoteEditMode(true)
                         }
-                        Log.i("test", "selected note list post add is ${viewModel.getSelectedNoteList}")
-                    })
+//                        Log.i("test", "selected note list post add is ${viewModel.getSelectedNoteList}")
+                    }
+                )
             },
             colors = CardDefaults.cardColors(
                 containerColor = colorResource(id = backgroundColor),
