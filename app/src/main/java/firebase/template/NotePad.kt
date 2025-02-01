@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
@@ -22,15 +23,21 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,35 +64,78 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun NoteBoard() {
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
+        val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
+        val selectedNoteList = viewModel.selectedNoteList.collectAsStateWithLifecycle()
 
-        Box(modifier = Modifier
-            .fillMaxSize()
-            //This should recompose child composables.
-            .background(colorResource(id = Theme.themeColorsList[colorTheme.value].defaultNoteBackground))
-        )
-        {
-            Column {
-                if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                    NoteCards()
-                    Spacer(modifier = Modifier.weight(1f))
-                    Row(modifier = Modifier
-                        .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End) {
-                        AddButton(modifier = Modifier
-                            .size(50.dp))
+        Log.i("test", "top recomp")
+
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
+                        titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
+                    ),
+                    title = {
+                        Text("Meal Decider")
+                    },
+                    actions = {
+                        if (editMode.value && selectedNoteList.value.isNotEmpty()) {
+                            MaterialIconButton(
+                                icon = Icons.Filled.Delete,
+                                description = "delete",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground) {
+                            }
+                        }
+
+                        //For drop down menu.
+                        Box(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.TopEnd)
+                        ) {
+
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding),
+            ) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    //This should recompose child composables.
+                    .background(colorResource(id = Theme.themeColorsList[colorTheme.value].defaultNoteBackground))
+                )
+                {
+                    Column {
+                        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
+                            NoteCards()
+                            Spacer(modifier = Modifier.weight(1f))
+                            Row(modifier = Modifier
+                                .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End) {
+                                AddButton(modifier = Modifier
+                                    .size(50.dp))
+                            }
+                        }
+
+                        if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
+                            AddNoteScreen()
+                        }
                     }
-                }
-
-                if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
-                    AddNoteScreen()
-                }
-            }
+                }            }
         }
     }
+
     @Composable
     fun NoteCards() {
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
@@ -115,25 +165,22 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
         Card(modifier = Modifier
             .fillMaxSize()
-            //TODO: .pointerInput overwriting .selectable
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
                         //If in edit mode and note clicked, highlight if not highlighted and vice-versa.
-                        Log.i("test", "edit mode is ${viewModel.getNoteEditMode}")
                         if (viewModel.getNoteEditMode) {
                             if (viewModel.getLocalNoteList[i].isHighlighted) viewModel.editLocalNoteListHighlight(i, false) else viewModel.editLocalNoteListHighlight(i, true)
                         }
                 },
                     onLongPress = {
                         isLongPressed = true
-                        //Long press should trigger edit mode and highlight only note selected. Further highlights will be regular presses.
+                        //Triggers edit mode and single highlight at first long press.
                         if (viewModel.getSelectedNoteList.isEmpty()) {
                             viewModel.addToSelectedNoteList(viewModel.getLocalNoteList[i])
                             viewModel.editLocalNoteListHighlight(i, true)
                             viewModel.updateNoteEditMode(true)
                         }
-//                        Log.i("test", "selected note list post add is ${viewModel.getSelectedNoteList}")
                     }
                 )
             },
@@ -183,7 +230,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         var titleTxtField by remember { mutableStateOf("") }
         var bodyTxtField by remember { mutableStateOf("") }
         val coroutineScope = rememberCoroutineScope()
-        val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
 
         AnimatedComposable(
             backHandler = {

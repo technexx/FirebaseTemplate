@@ -10,6 +10,7 @@ class Themes {
     companion object {
         data class ColorTheme(
             val primaryColor: Int,
+            val topBarBackground: Int,
             val notePadBackground: Int,
             val defaultNoteBackground: Int,
             val highlightedNoteBackGround: Int,
@@ -18,6 +19,7 @@ class Themes {
             val textFieldColor: Int,
             val textFieldCursorColor: Int,
             val textFieldPlaceHolderTextColor: Int,
+            val iconBackground: Int,
         )
 
     }
@@ -31,6 +33,7 @@ object Theme {
         //Light
         Themes.Companion.ColorTheme(
             primaryColor = R.color.black,
+            topBarBackground = R.color.white,
             notePadBackground = R.color.grey_400,
             defaultNoteBackground = R.color.grey_200,
             highlightedNoteBackGround = R.color.blue_400,
@@ -39,11 +42,13 @@ object Theme {
             textFieldColor = R.color.grey_400,
             textFieldCursorColor = R.color.grey_400,
             textFieldPlaceHolderTextColor = R.color.black,
+            iconBackground = R.color.black
         ),
 
         //Dark
         Themes.Companion.ColorTheme(
             primaryColor = R.color.white,
+            topBarBackground = R.color.black,
             notePadBackground = R.color.black,
             defaultNoteBackground = R.color.grey_400,
             highlightedNoteBackGround = R.color.blue_400,
@@ -52,6 +57,7 @@ object Theme {
             textFieldColor = R.color.white,
             textFieldCursorColor = R.color.white,
             textFieldPlaceHolderTextColor = R.color.white,
+            iconBackground = R.color.white
         )
     )
 }
