@@ -1,5 +1,6 @@
 package firebase.template
 
+import android.util.Log
 import android.util.Log.i
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
@@ -44,31 +45,24 @@ class ViewModel : ViewModel() {
         updateLocalNoteList(newList)
     }
 
-    fun removeFromLocalNoteList() {
-        val localNoteList = getLocalNoteList
+    fun removeFromLocalNotesList() {
+        val localNoteList = getLocalNoteList.toMutableList()
         val selectedNoteList = getSelectedNoteList
-        for (i in localNoteList) {
-            if localNoteList.contains()
+//        Log.i("test", "selected list is in deletions function ae $getSelectedNoteList")
+        val listOfItemsToRemove = localNoteList.filter { it in selectedNoteList }
+
+//        Log.i("test", "items to remove are $listOfItemsToRemove")
+        for (i in listOfItemsToRemove) {
+            localNoteList.remove(i)
         }
+        updateLocalNoteList(localNoteList)
     }
 
-    fun editLocalNoteListTitle() {
-
-    }
-
-    fun editLocalNoteListBody() {
-
-    }
-
-    fun editLocalNoteListLastEdited() {
-
-    }
-
-    fun editLocalNoteListHighlight(index: Int, isHighlighted: Boolean) {
+    fun editLocalNoteListHighlight(index: Int) {
         val noteList = getLocalNoteList.toMutableList()
         var noteToReplace = noteList[index]
         //Copy contents of note to edit, changing only highlight boolean.
-        noteToReplace = NoteContents(noteToReplace.title, noteToReplace.body, noteToReplace.lastEdited, isHighlighted)
+        noteToReplace = NoteContents(noteToReplace.id, noteToReplace.title, noteToReplace.body, noteToReplace.lastEdited)
         //In our temporary note list, replace note in selected index before updating actual list.
         noteList[index] = noteToReplace
         updateLocalNoteList(noteList)
@@ -84,12 +78,17 @@ class ViewModel : ViewModel() {
         updateSelectedNoteList(currentList)
     }
 
+    //TODO: Issue is isHighlighted being false in local list.
     fun removeFromSelectedNoteList(index: Int) {
         val selectedList = getSelectedNoteList.toMutableList()
         val localNoteList = getLocalNoteList
+
         if (selectedList.contains(localNoteList[index])) {
             selectedList.remove(localNoteList[index])
+            Log.i("test", "removing ${localNoteList[index]}")
         }
+        Log.i("test", "note to remove is ${localNoteList[index]}")
+
         updateSelectedNoteList(selectedList)
     }
 
