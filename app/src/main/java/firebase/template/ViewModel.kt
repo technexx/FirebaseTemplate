@@ -44,6 +44,14 @@ class ViewModel : ViewModel() {
         updateLocalNoteList(newList)
     }
 
+    fun removeFromLocalNoteList() {
+        val localNoteList = getLocalNoteList
+        val selectedNoteList = getSelectedNoteList
+        for (i in localNoteList) {
+            if localNoteList.contains()
+        }
+    }
+
     fun editLocalNoteListTitle() {
 
     }
@@ -76,14 +84,13 @@ class ViewModel : ViewModel() {
         updateSelectedNoteList(currentList)
     }
 
-    fun highlightSelectedNotes() {
-        val selectedNotes = getSelectedNoteList
+    fun removeFromSelectedNoteList(index: Int) {
+        val selectedList = getSelectedNoteList.toMutableList()
         val localNoteList = getLocalNoteList
-
-        for (i in getLocalNoteList) {
-            if (selectedNotes.contains(i)) {
-            }
+        if (selectedList.contains(localNoteList[index])) {
+            selectedList.remove(localNoteList[index])
         }
+        updateSelectedNoteList(selectedList)
     }
 
     fun updateSelectedNoteList(note: List<NoteContents>) {
