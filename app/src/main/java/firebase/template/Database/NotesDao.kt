@@ -1,6 +1,7 @@
 package firebase.template.Database
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -19,5 +20,8 @@ interface NotesDao {
 
     @Update
     fun updateNotes(cuisine:NoteData)
+
+    @Delete
+    fun deleteNotes(note: NoteData)
 
 }

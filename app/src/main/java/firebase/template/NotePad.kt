@@ -70,7 +70,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
-        val selectedNoteList = viewModel.selectedNoteList.collectAsStateWithLifecycle()
+        val coroutineScope = rememberCoroutineScope()
 
         Scaffold(
             modifier = Modifier
@@ -85,13 +85,15 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         Text("Meal Decider")
                     },
                     actions = {
-                        if (editMode.value && selectedNoteList.value.isNotEmpty()) {
+                        if (editMode.value && viewModel.areAnyNotesSelected()) {
                             MaterialIconButton(
                                 icon = Icons.Filled.Delete,
                                 description = "delete",
                                 tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground) {
-                                //TODO: Actions
                                 viewModel.removeFromLocalNotesList()
+                                coroutineScope.launch {
+                                    roomInteraction.deleteSelectedNotesFromDatabase()
+                                }
                             }
                         }
 
@@ -151,25 +153,15 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         }
     }
 
-    //TODO: Identical notes will highlight together if one is selected
     @Composable
-    fun NoteContainer(note: List<NoteContents>, i: Int) {
+    fun NoteContainer(note: List<NoteContents>, index: Int) {
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
         var isLongPressed by remember { mutableStateOf(false) }
-        val selectedNoteList = viewModel.selectedNoteList.collectAsStateWithLifecycle()
 
-        Log.i("test", "selected list is top of recomp is ${viewModel.getSelectedNoteList}")
-
-        //For each note (card), have background color correspond to isHighlighted boolean from its data object.
-//        val backgroundColor = if (!localNoteList.value[i].isHighlighted) Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground else Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
-        val backgroundColor: Int
-
-        if (!selectedNoteList.value.contains(viewModel.getLocalNoteList[i])) {
-            backgroundColor = Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground
-            Log.i("test", "position $i is not highlighting")
+        val backgroundColor = if (localNoteList.value[index].isSelected){
+            Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
         } else {
-            backgroundColor = Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
-            Log.i("test", "position $i is highlighting")
+            Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground
         }
 
         val borderColor = Theme.themeColorsList[viewModel.getColorTheme].noteBorder
@@ -180,27 +172,21 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        //If in edit mode and note clicked, highlight if not highlighted and vice-versa.
+                        //If in edit mode and note clicked, toggle selection.
                         if (viewModel.getNoteEditMode) {
-                            if (!viewModel.getSelectedNoteList.contains(viewModel.getLocalNoteList[i])) {
-                                viewModel.addToSelectedNoteList(viewModel.getLocalNoteList[i])
-                                viewModel.editLocalNoteListHighlight(i)
+                            if (viewModel.getLocalNoteList[index].isSelected) {
+                                viewModel.markNoteAsSelectedOrUnselected(false, index)
                             } else {
-                                viewModel.removeFromSelectedNoteList(i)
-                                viewModel.editLocalNoteListHighlight(i)
+                                viewModel.markNoteAsSelectedOrUnselected(true, index)
                             }
                         }
 
                     },
                     onLongPress = {
                         isLongPressed = true
-                        //Triggers edit mode and single highlight at first long press.
-                        if (viewModel.getSelectedNoteList.isEmpty()) {
-                            viewModel.addToSelectedNoteList(viewModel.getLocalNoteList[i])
-                            viewModel.editLocalNoteListHighlight(i)
+                        //Triggers edit mode and single highlight if no notes are selected.
+                        if (!viewModel.areAnyNotesSelected()) {
                             viewModel.updateNoteEditMode(true)
-                            Log.i("test", "selected list is in long press is ${viewModel.getSelectedNoteList}")
-
                         }
                     }
                 )
@@ -216,12 +202,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(6.dp)){
-                RegText(text = note[i].title, fontSize = 18, color = colorResource(textColor), fontWeight = FontWeight.Bold)
-                RegText(text = note[i].body, fontSize = 15, color = colorResource(textColor))
+                RegText(text = note[index].title, fontSize = 18, color = colorResource(textColor), fontWeight = FontWeight.Bold)
+                RegText(text = note[index].body, fontSize = 15, color = colorResource(textColor))
                 Row(modifier = Modifier
                     .fillMaxSize(),
                     horizontalArrangement = Arrangement.End) {
-                    RegText(text = note[i].lastEdited, fontSize = 15, color = colorResource(textColor))
+                    RegText(text = note[index].lastEdited, fontSize = 15, color = colorResource(textColor))
                 }
             }
 
@@ -255,12 +241,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         AnimatedComposable(
             backHandler = {
                 if (titleTxtField.isBlank()) titleTxtField = "Untitled"
-                val newNote = NoteContents(viewModel.getLocalNoteList.size -1, titleTxtField, bodyTxtField, dateTime())
+                val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, dateTime(), false)
                 viewModel.addToLocalNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
                 coroutineScope.launch {
-                    val databaseNote = NoteData(null, newNote.title, newNote.body, newNote.lastEdited)
+                    val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
                     roomInteraction.insertNoteIntoDatabase(databaseNote)
                 }
             }
@@ -278,7 +264,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         titleTxtField = it
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 22.sp, fontWeight = FontWeight.Bold),
                     colors = TextFieldDefaults.colors(
                         cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
                         focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
@@ -300,7 +286,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         bodyTxtField = it
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor), fontSize = 16.sp),
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 16.sp),
 
                     colors = TextFieldDefaults.colors(
                         cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),

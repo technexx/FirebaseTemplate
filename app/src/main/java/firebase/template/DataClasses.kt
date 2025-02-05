@@ -7,6 +7,7 @@ data class NoteContents(
     var title: String,
     var body: String,
     var lastEdited: String,
+    var isSelected: Boolean
 //    var backgroundColor: Int,
 //    var isHighlighted: Boolean
 )

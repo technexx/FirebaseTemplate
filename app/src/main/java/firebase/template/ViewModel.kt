@@ -4,6 +4,7 @@ import android.util.Log
 import android.util.Log.i
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
+import firebase.template.Database.NoteData
 import firebase.template.NoteContents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,9 +23,6 @@ class ViewModel : ViewModel() {
 
     private val _localNoteList = MutableStateFlow(emptyList<NoteContents>())
     val localNoteList: StateFlow<List<NoteContents>> = _localNoteList.asStateFlow()
-
-    private val _selectedNotesList = MutableStateFlow(emptyList<NoteContents>())
-    val selectedNoteList: StateFlow<List<NoteContents>> = _selectedNotesList.asStateFlow()
 
     private val _noteEditMode = MutableStateFlow(false)
     val noteEditMode: StateFlow<Boolean> = _noteEditMode.asStateFlow()
@@ -47,53 +45,29 @@ class ViewModel : ViewModel() {
 
     fun removeFromLocalNotesList() {
         val localNoteList = getLocalNoteList.toMutableList()
-        val selectedNoteList = getSelectedNoteList
-//        Log.i("test", "selected list is in deletions function ae $getSelectedNoteList")
-        val listOfItemsToRemove = localNoteList.filter { it in selectedNoteList }
-
-//        Log.i("test", "items to remove are $listOfItemsToRemove")
-        for (i in listOfItemsToRemove) {
-            localNoteList.remove(i)
+        for (i in localNoteList) {
+            if (i.isSelected) localNoteList.remove(i)
         }
         updateLocalNoteList(localNoteList)
     }
 
-    fun editLocalNoteListHighlight(index: Int) {
-        val noteList = getLocalNoteList.toMutableList()
-        var noteToReplace = noteList[index]
-        //Copy contents of note to edit, changing only highlight boolean.
-        noteToReplace = NoteContents(noteToReplace.id, noteToReplace.title, noteToReplace.body, noteToReplace.lastEdited)
-        //In our temporary note list, replace note in selected index before updating actual list.
-        noteList[index] = noteToReplace
-        updateLocalNoteList(noteList)
+    fun markNoteAsSelectedOrUnselected(selected: Boolean, index: Int) {
+        val localNoteList = getLocalNoteList
+        val updatedList = mutableListOf<NoteContents>()
+        localNoteList[index].isSelected = selected
+        updateLocalNoteList(updatedList)
+    }
+
+    fun areAnyNotesSelected(): Boolean {
+        val localNoteList = getLocalNoteList
+        for (i in localNoteList) {
+            if (i.isSelected) return true
+        }
+        return false
     }
 
     fun updateLocalNoteList(note: List<NoteContents>) {
         _localNoteList.value = note
-    }
-
-    fun addToSelectedNoteList(note: NoteContents) {
-        val currentList = getSelectedNoteList.toMutableList()
-        currentList.add(note)
-        updateSelectedNoteList(currentList)
-    }
-
-    //TODO: Issue is isHighlighted being false in local list.
-    fun removeFromSelectedNoteList(index: Int) {
-        val selectedList = getSelectedNoteList.toMutableList()
-        val localNoteList = getLocalNoteList
-
-        if (selectedList.contains(localNoteList[index])) {
-            selectedList.remove(localNoteList[index])
-            Log.i("test", "removing ${localNoteList[index]}")
-        }
-        Log.i("test", "note to remove is ${localNoteList[index]}")
-
-        updateSelectedNoteList(selectedList)
-    }
-
-    fun updateSelectedNoteList(note: List<NoteContents>) {
-        _selectedNotesList.value = note
     }
 
     fun updateNoteEditMode(isActive: Boolean) {
@@ -103,7 +77,6 @@ class ViewModel : ViewModel() {
     val getColorTheme get() = colorTheme.value
     val getCurrentScreen get() = currentScreen.value
     val getLocalNoteList get() = localNoteList.value
-    val getSelectedNoteList get() = selectedNoteList.value
     val getNoteEditMode get() = noteEditMode.value
 
 }
