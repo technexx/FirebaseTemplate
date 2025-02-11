@@ -66,7 +66,7 @@ import java.util.Date
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun NoteBoard() {
+    fun MainBoard() {
         val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
@@ -86,7 +86,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     },
                     actions = {
                         if (editMode.value && viewModel.areAnyNotesSelected()) {
-                            Log.i("test", "scaffold recomp")
                             MaterialIconButton(
                                 icon = Icons.Filled.Delete,
                                 description = "delete",
@@ -121,8 +120,10 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 {
                     Column {
                         if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                            NoteCards()
+                            NoteLazyColumn()
+
                             Spacer(modifier = Modifier.weight(1f))
+
                             Row(modifier = Modifier
                                 .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.End) {
@@ -130,8 +131,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                     .size(50.dp))
                             }
                         }
-                        Log.i("test", "scaffold recomp")
-
                         if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
                             AddNoteScreen()
                         }
@@ -142,7 +141,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     }
 
     @Composable
-    fun NoteCards() {
+    fun NoteLazyColumn() {
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
 
         LazyColumn (
@@ -151,19 +150,19 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             horizontalAlignment = Alignment.CenterHorizontally,
         ){
             items (localNoteList.value.size) { index ->
-                NoteContainer(localNoteList.value, index)
+                NoteContainer(index)
             }
         }
     }
 
     @Composable
-    fun NoteContainer(note: List<NoteContents>, index: Int) {
+    fun NoteContainer(index: Int) {
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
         var isLongPressed by remember { mutableStateOf(false) }
 
         Log.i("test", "note container recomp")
 
-        val backgroundColor = if (note[index].isSelected){
+        val backgroundColor = if (localNoteList.value[index].isSelected){
             Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
         } else {
             Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground
@@ -179,7 +178,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     onTap = {
                         //If in edit mode and note clicked, toggle selection.
                         if (viewModel.getNoteEditMode) {
-                            if (viewModel.getLocalNoteList[index].isSelected) {
+                            if (localNoteList.value[index].isSelected) {
                                 viewModel.markNoteAsSelectedOrUnselected(false, index)
                             } else {
                                 viewModel.markNoteAsSelectedOrUnselected(true, index)
@@ -194,7 +193,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             //TODO: Trash can does not appear is markNoteAsSelected is not also present.
                             //TODO: Check previous branch and/or deconstruct and simplify.
                             viewModel.updateNoteEditMode(true)
-//                            viewModel.markNoteAsSelectedOrUnselected(true, index)
+                            viewModel.markNoteAsSelectedOrUnselected(true, index)
                             Log.i("test", "long pressed w/ nothing selected")
                         }
                     }

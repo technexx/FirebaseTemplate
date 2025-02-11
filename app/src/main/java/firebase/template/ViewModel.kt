@@ -57,9 +57,14 @@ class ViewModel : ViewModel() {
 
     fun markNoteAsSelectedOrUnselected(selected: Boolean, index: Int) {
         val localNoteList = getLocalNoteList.toMutableList()
+
         //TODO: With just this (and without update), our delete button recomp works.
         localNoteList[index].isSelected = selected
         updateLocalNoteList(localNoteList)
+
+        for (i in getLocalNoteList) {
+            Log.i("test", "updated list highlight is ${i.isSelected}")
+        }
     }
 
     fun updateLocalNoteList(note: List<NoteContents>) {

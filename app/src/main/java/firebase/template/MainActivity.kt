@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainSurface {
-                        notePad.NoteBoard()
+                        notePad.MainBoard()
                     }
                 }
             }
