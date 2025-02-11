@@ -35,6 +35,10 @@ class ViewModel : ViewModel() {
         _colorTheme.value = theme
     }
 
+    fun updateNoteEditMode(isActive: Boolean) {
+        _noteEditMode.value = isActive
+    }
+
     fun addToLocalNoteList(note: NoteContents) {
         val noteList = getLocalNoteList
         val newList = SnapshotStateList<NoteContents>()
@@ -52,10 +56,14 @@ class ViewModel : ViewModel() {
     }
 
     fun markNoteAsSelectedOrUnselected(selected: Boolean, index: Int) {
-        val localNoteList = getLocalNoteList
-        val updatedList = mutableListOf<NoteContents>()
+        val localNoteList = getLocalNoteList.toMutableList()
+        //TODO: With just this (and without update), our delete button recomp works.
         localNoteList[index].isSelected = selected
-        updateLocalNoteList(updatedList)
+        updateLocalNoteList(localNoteList)
+    }
+
+    fun updateLocalNoteList(note: List<NoteContents>) {
+        _localNoteList.value = note
     }
 
     fun areAnyNotesSelected(): Boolean {
@@ -64,14 +72,6 @@ class ViewModel : ViewModel() {
             if (i.isSelected) return true
         }
         return false
-    }
-
-    fun updateLocalNoteList(note: List<NoteContents>) {
-        _localNoteList.value = note
-    }
-
-    fun updateNoteEditMode(isActive: Boolean) {
-        _noteEditMode.value = isActive
     }
 
     val getColorTheme get() = colorTheme.value

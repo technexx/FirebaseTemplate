@@ -86,6 +86,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     },
                     actions = {
                         if (editMode.value && viewModel.areAnyNotesSelected()) {
+                            Log.i("test", "scaffold recomp")
                             MaterialIconButton(
                                 icon = Icons.Filled.Delete,
                                 description = "delete",
@@ -129,12 +130,14 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                     .size(50.dp))
                             }
                         }
+                        Log.i("test", "scaffold recomp")
 
                         if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
                             AddNoteScreen()
                         }
                     }
-                }            }
+                }
+            }
         }
     }
 
@@ -158,7 +161,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
         var isLongPressed by remember { mutableStateOf(false) }
 
-        val backgroundColor = if (localNoteList.value[index].isSelected){
+        Log.i("test", "note container recomp")
+
+        val backgroundColor = if (note[index].isSelected){
             Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
         } else {
             Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground
@@ -186,7 +191,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         isLongPressed = true
                         //Triggers edit mode and single highlight if no notes are selected.
                         if (!viewModel.areAnyNotesSelected()) {
+                            //TODO: Trash can does not appear is markNoteAsSelected is not also present.
+                            //TODO: Check previous branch and/or deconstruct and simplify.
                             viewModel.updateNoteEditMode(true)
+//                            viewModel.markNoteAsSelectedOrUnselected(true, index)
+                            Log.i("test", "long pressed w/ nothing selected")
                         }
                     }
                 )
@@ -202,12 +211,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(6.dp)){
-                RegText(text = note[index].title, fontSize = 18, color = colorResource(textColor), fontWeight = FontWeight.Bold)
-                RegText(text = note[index].body, fontSize = 15, color = colorResource(textColor))
+                RegText(text = viewModel.getLocalNoteList[index].title, fontSize = 18, color = colorResource(textColor), fontWeight = FontWeight.Bold)
+                RegText(text = viewModel.getLocalNoteList[index].body, fontSize = 15, color = colorResource(textColor))
                 Row(modifier = Modifier
                     .fillMaxSize(),
                     horizontalArrangement = Arrangement.End) {
-                    RegText(text = note[index].lastEdited, fontSize = 15, color = colorResource(textColor))
+                    RegText(text = viewModel.getLocalNoteList[index].lastEdited, fontSize = 15, color = colorResource(textColor))
                 }
             }
 
