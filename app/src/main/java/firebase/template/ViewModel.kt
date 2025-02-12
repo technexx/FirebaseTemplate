@@ -62,13 +62,26 @@ class ViewModel : ViewModel() {
 
     //Using new list with new copies of each NoteContent item to trigger recomposition.
     fun markNoteAsSelectedOrUnselected(selected: Boolean, index: Int) {
+        val newList = getNewCopyOfLocalNoteList()
+        newList[index].isSelected = selected
+
+        updateLocalNoteList(newList)
+    }
+
+    fun markAllNotesAsUnselected() {
+        val localNoteList = getNewCopyOfLocalNoteList()
+        for (i in localNoteList) {
+            i.isSelected = false
+        }
+        updateLocalNoteList(localNoteList)
+    }
+
+    private fun getNewCopyOfLocalNoteList(): SnapshotStateList<NoteContents> {
         val newList = SnapshotStateList<NoteContents>()
         for (i in getLocalNoteList.indices) {
             newList.add(NoteContents(getLocalNoteList[i].id, getLocalNoteList[i].title, getLocalNoteList[i].body, getLocalNoteList[i].lastEdited, getLocalNoteList[i].isSelected))
         }
-        newList[index].isSelected = selected
-
-        updateLocalNoteList(newList)
+        return newList
     }
 
     fun areAnyNotesSelected(): Boolean {

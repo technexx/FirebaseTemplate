@@ -93,7 +93,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                 description = "back arrow",
                                 tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
                             ) {
-
+                                viewModel.updateNoteEditMode(false)
+                                viewModel.markAllNotesAsUnselected()
                             }
                         } else {
                             MaterialIconButton(
