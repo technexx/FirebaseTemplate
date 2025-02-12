@@ -24,6 +24,8 @@ import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -83,6 +85,25 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     ),
                     title = {
                         Text("Meal Decider")
+                    },
+                    navigationIcon = {
+                        if (editMode.value) {
+                            MaterialIconButton(
+                                icon = Icons.Filled.KeyboardArrowLeft,
+                                description = "back arrow",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+
+                            }
+                        } else {
+                            MaterialIconButton(
+                                icon = Icons.Filled.Menu,
+                                description = "back arrow",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+
+                            }
+                        }
                     },
                     actions = {
                         if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
