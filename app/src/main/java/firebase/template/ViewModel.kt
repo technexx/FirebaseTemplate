@@ -60,23 +60,15 @@ class ViewModel : ViewModel() {
         updateLocalNoteList(localNoteList)
     }
 
-    //TODO: Remember, addToLocalNoteList does recomp. So what are we missing? Is it because we're only changing parts of the Note object instead of adding/deleting?
-    //TODO: It DOES recompose if we add an item to the list.
+    //Using new list with new copies of each NoteContent item to trigger recomposition.
     fun markNoteAsSelectedOrUnselected(selected: Boolean, index: Int) {
-        val localNoteList = getLocalNoteList
         val newList = SnapshotStateList<NoteContents>()
-
-        for (i in localNoteList.indices) {
-            newList.add(NoteContents(localNoteList[i].id, localNoteList[i].title, localNoteList[i].body, localNoteList[i].lastEdited, localNoteList[i].isSelected))
+        for (i in getLocalNoteList.indices) {
+            newList.add(NoteContents(getLocalNoteList[i].id, getLocalNoteList[i].title, getLocalNoteList[i].body, getLocalNoteList[i].lastEdited, getLocalNoteList[i].isSelected))
         }
-//        newList.add(NoteContents(9, "boo", "bah", "okay", false))
         newList[index].isSelected = selected
 
         updateLocalNoteList(newList)
-
-        for (i in newList) {
-            Log.i("test", "updated list highlight is ${i.isSelected}")
-        }
     }
 
     fun areAnyNotesSelected(): Boolean {

@@ -64,6 +64,7 @@ import java.util.Date
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MainBoard() {
 //        val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
@@ -71,32 +72,65 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
-        Column(
+        Scaffold(
             modifier = Modifier
-        ) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                //This should recompose child composables.
-            )
-            {
-                Column {
-                    if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                        NoteLazyColumn()
+                .fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
+                        titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
+                    ),
+                    title = {
+                        Text("Meal Decider")
+                    },
+                    actions = {
+                        if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
+                            MaterialIconButton(
+                                icon = Icons.Filled.Delete,
+                                description = "delete",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground) {
+                            }
+                        }
 
-                        Spacer(modifier = Modifier.weight(1f))
+                        //For drop down menu.
+                        Box(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.TopEnd)
+                        ) {
 
-                        Row(modifier = Modifier
-                            .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End) {
-                            AddButton(modifier = Modifier
-                                .size(50.dp))
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding),
+            ) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    //This should recompose child composables.
+                    .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground))
+                )
+                {
+                    Column {
+                        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
+                            NoteLazyColumn()
+                            Spacer(modifier = Modifier.weight(1f))
+                            Row(modifier = Modifier
+                                .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End) {
+                                AddButton(modifier = Modifier
+                                    .size(50.dp))
+                            }
+                        }
+
+                        if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
+                            AddNoteScreen()
                         }
                     }
-                    if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
-                        AddNoteScreen()
-                    }
-                }
-            }
+                }            }
         }
     }
 
@@ -122,8 +156,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
         var isLongPressed by remember { mutableStateOf(false) }
 
-        Log.i("test", "note container recomp")
-
         val backgroundColor = if (localNoteList.value[index].isSelected){
             Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
         } else {
@@ -133,6 +165,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val borderColor = Theme.themeColorsList[viewModel.getColorTheme].noteBorder
         val textColor = Theme.themeColorsList[viewModel.getColorTheme].noteText
 
+        Log.i("test", "edit mode is ${viewModel.getNoteEditMode}")
+
+
         Card(modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
@@ -140,7 +175,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     onTap = {
                         //If in edit mode and note clicked, toggle selection.
                         if (viewModel.getNoteEditMode) {
-                            if (localNoteList.value[index].isSelected) {
+                            if (viewModel.getLocalNoteList[index].isSelected) {
                                 viewModel.markNoteAsSelectedOrUnselected(false, index)
                             } else {
                                 viewModel.markNoteAsSelectedOrUnselected(true, index)
@@ -151,10 +186,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         isLongPressed = true
                         //Triggers edit mode and single highlight if no notes are selected.
                         if (!viewModel.areAnyNotesSelected()) {
-                            //TODO: Trash can does not appear is markNoteAsSelected is not also present.
                             viewModel.updateNoteEditMode(true)
                             viewModel.markNoteAsSelectedOrUnselected(true, index)
-                            Log.i("test", "long pressed w/ nothing selected")
                         }
                     }
                 )
