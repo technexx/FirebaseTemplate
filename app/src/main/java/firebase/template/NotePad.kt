@@ -56,84 +56,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import firebase.template.Database.NoteData
 import firebase.template.ui.theme.showPlaceHolderTextIfFieldIsEmpty
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MainBoard() {
-        val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
+//        val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
-        Scaffold(
+        Column(
             modifier = Modifier
-                .fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
-                        titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
-                    ),
-                    title = {
-                        Text("Meal Decider")
-                    },
-                    actions = {
-                        if (editMode.value && viewModel.areAnyNotesSelected()) {
-                            MaterialIconButton(
-                                icon = Icons.Filled.Delete,
-                                description = "delete",
-                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground) {
-                                viewModel.removeFromLocalNotesList()
-                                coroutineScope.launch {
-                                    roomInteraction.deleteSelectedNotesFromDatabase()
-                                }
-                            }
-                        }
+        ) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                //This should recompose child composables.
+            )
+            {
+                Column {
+                    if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
+                        NoteLazyColumn()
 
-                        //For drop down menu.
-                        Box(
-                            modifier = Modifier
-                                .wrapContentSize(Alignment.TopEnd)
-                        ) {
+                        Spacer(modifier = Modifier.weight(1f))
 
+                        Row(modifier = Modifier
+                            .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End) {
+                            AddButton(modifier = Modifier
+                                .size(50.dp))
                         }
-                    },
-                )
-            },
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding),
-            ) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    //This should recompose child composables.
-                    .background(colorResource(id = Theme.themeColorsList[colorTheme.value].defaultNoteBackground))
-                )
-                {
-                    Column {
-                        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                            NoteLazyColumn()
-
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            Row(modifier = Modifier
-                                .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End) {
-                                AddButton(modifier = Modifier
-                                    .size(50.dp))
-                            }
-                        }
-                        if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
-                            AddNoteScreen()
-                        }
+                    }
+                    if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
+                        AddNoteScreen()
                     }
                 }
             }
@@ -143,6 +103,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @Composable
     fun NoteLazyColumn() {
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
+        Log.i("test", "note lazycolumn recomp")
+
 
         LazyColumn (
             modifier = Modifier
@@ -184,14 +146,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                 viewModel.markNoteAsSelectedOrUnselected(true, index)
                             }
                         }
-
                     },
                     onLongPress = {
                         isLongPressed = true
                         //Triggers edit mode and single highlight if no notes are selected.
                         if (!viewModel.areAnyNotesSelected()) {
                             //TODO: Trash can does not appear is markNoteAsSelected is not also present.
-                            //TODO: Check previous branch and/or deconstruct and simplify.
                             viewModel.updateNoteEditMode(true)
                             viewModel.markNoteAsSelectedOrUnselected(true, index)
                             Log.i("test", "long pressed w/ nothing selected")

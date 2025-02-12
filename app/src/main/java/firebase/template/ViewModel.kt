@@ -9,6 +9,7 @@ import firebase.template.NoteContents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 
 class ViewModel : ViewModel() {
@@ -35,6 +36,10 @@ class ViewModel : ViewModel() {
         _colorTheme.value = theme
     }
 
+    fun updateLocalNoteList(note: List<NoteContents>) {
+        _localNoteList.value = note
+    }
+
     fun updateNoteEditMode(isActive: Boolean) {
         _noteEditMode.value = isActive
     }
@@ -55,20 +60,23 @@ class ViewModel : ViewModel() {
         updateLocalNoteList(localNoteList)
     }
 
+    //TODO: Remember, addToLocalNoteList does recomp. So what are we missing? Is it because we're only changing parts of the Note object instead of adding/deleting?
+    //TODO: It DOES recompose if we add an item to the list.
     fun markNoteAsSelectedOrUnselected(selected: Boolean, index: Int) {
-        val localNoteList = getLocalNoteList.toMutableList()
+        val localNoteList = getLocalNoteList
+        val newList = SnapshotStateList<NoteContents>()
 
-        //TODO: With just this (and without update), our delete button recomp works.
-        localNoteList[index].isSelected = selected
-        updateLocalNoteList(localNoteList)
+        for (i in localNoteList.indices) {
+            newList.add(NoteContents(localNoteList[i].id, localNoteList[i].title, localNoteList[i].body, localNoteList[i].lastEdited, localNoteList[i].isSelected))
+        }
+//        newList.add(NoteContents(9, "boo", "bah", "okay", false))
+        newList[index].isSelected = selected
 
-        for (i in getLocalNoteList) {
+        updateLocalNoteList(newList)
+
+        for (i in newList) {
             Log.i("test", "updated list highlight is ${i.isSelected}")
         }
-    }
-
-    fun updateLocalNoteList(note: List<NoteContents>) {
-        _localNoteList.value = note
     }
 
     fun areAnyNotesSelected(): Boolean {
