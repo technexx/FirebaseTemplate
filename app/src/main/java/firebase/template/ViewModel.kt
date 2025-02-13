@@ -54,9 +54,6 @@ class ViewModel : ViewModel() {
 
     fun removeFromLocalNotesList() {
         val newList = SnapshotStateList<NoteContents>()
-        for (i in getLocalNoteList) {
-            Log.i("test", "old list is $i")
-        }
 
         for (i in getLocalNoteList) {
             newList.add(i)
@@ -64,10 +61,6 @@ class ViewModel : ViewModel() {
         }
         updateLocalNoteList(newList)
 
-        for (i in newList) {
-            Log.i("test", "updated list is $i")
-
-        }
     }
 
     //Using new list with new copies of each NoteContent item to trigger recomposition.

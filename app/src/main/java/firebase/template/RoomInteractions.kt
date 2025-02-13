@@ -1,6 +1,7 @@
 package firebase.template
 
 import android.util.Log
+import android.util.Log.i
 import firebase.template.Database.NoteData
 import firebase.template.Database.NotesDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +19,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         }
     }
 
-    suspend fun getAllNotesFromDatabase(): List<NoteData> {
+    private suspend fun databaseNoteList(): List<NoteData> {
         var noteList: List<NoteData>
         withContext(Dispatchers.IO) {
             notesDao.getAllNotesData()
@@ -27,25 +28,29 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         return noteList
     }
 
-    private suspend fun noteListFromDatabaseStorage(): List<NoteContents> {
+    private suspend fun localNoteListFromDatabaseStorage(): List<NoteContents> {
         val noteHolder = mutableListOf<NoteContents>()
 
-        val dbContents = getAllNotesFromDatabase()
+        val dbContents = databaseNoteList()
         for (i in dbContents) {
-            noteHolder.add(NoteContents(viewModel.getLocalNoteList.size, i.title, i.body, i.lastEdited, false))
+            noteHolder.add(NoteContents(i.id, i.title, i.body, i.lastEdited, false))
         }
 
         return noteHolder
     }
 
     suspend fun deleteSelectedNotesFromDatabase() {
-        val databaseNoteList = getDatabaseNoteListFromLocalNoteList()
-        val idList = listOfIdsOfSelectedNotes()
-        val listOfDatabaseNotesToDelete = mutableListOf<NoteData>()
+        withContext(Dispatchers.IO) {
+//            val databaseNoteList = getDatabaseNoteListFromLocalNoteList()
+            val databaseNoteList = databaseNoteList()
+            val idList = listOfIdsOfSelectedNotes()
 
-        for (i in databaseNoteList) {
-            if (idList.contains(i.id)) {
-                listOfDatabaseNotesToDelete.add(i)
+            for (i in databaseNoteList) {
+//                notesDao.deleteNotes(i)
+                if (idList.contains(i.id)) {
+                    notesDao.deleteNotes(i)
+                    Log.i("test", "deleting note $i with id of ${i.id}")
+                }
             }
         }
     }
@@ -59,7 +64,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         return databaseNoteList
     }
 
-    private fun listOfIdsOfSelectedNotes(): List<Int> {
+    fun listOfIdsOfSelectedNotes(): List<Int> {
         val localNoteList = viewModel.getLocalNoteList
         val listOfSelectedIds = mutableListOf<Int>()
         for (i in localNoteList) {
@@ -70,7 +75,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
 
     suspend fun populateLocalNoteListFromDatabase() {
         val localList = mutableListOf<NoteContents>()
-        for (i in noteListFromDatabaseStorage()) {
+        for (i in localNoteListFromDatabaseStorage()) {
             localList.add(NoteContents(viewModel.getLocalNoteList.size -1, i.title, i.body, i.lastEdited, false))
         }
         viewModel.updateLocalNoteList(localList)

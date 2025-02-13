@@ -23,5 +23,4 @@ interface NotesDao {
 
     @Delete
     fun deleteNotes(note: NoteData)
-
 }

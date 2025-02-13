@@ -138,7 +138,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 Box(modifier = Modifier
                     .fillMaxSize()
                     //This should recompose child composables.
-                    .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground))
+                    .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
                     Column {
@@ -184,7 +184,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val backgroundColor = if (localNoteList.value[index].isSelected){
             Theme.themeColorsList[viewModel.getColorTheme].highlightedNoteBackGround
         } else {
-            Theme.themeColorsList[viewModel.getColorTheme].defaultNoteBackground
+            Theme.themeColorsList[viewModel.getColorTheme].noteBackground
         }
 
         val borderColor = Theme.themeColorsList[viewModel.getColorTheme].noteBorder
@@ -267,10 +267,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, dateTime(), false)
                 viewModel.addToLocalNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                Log.i("test", "id of local note added is ${newNote.id}")
 
                 coroutineScope.launch {
                     val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
                     roomInteraction.insertNoteIntoDatabase(databaseNote)
+                    Log.i("test", "id of db note added is ${newNote.id}")
                 }
             }
         ) {
