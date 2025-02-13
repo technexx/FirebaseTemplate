@@ -111,7 +111,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             MaterialIconButton(
                                 icon = Icons.Filled.Delete,
                                 description = "delete",
-                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground) {
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+                                coroutineScope.launch {
+                                    roomInteraction.deleteSelectedNotesFromDatabase()
+                                    viewModel.removeFromLocalNotesList()
+                                }
                             }
                         }
 
@@ -159,8 +164,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @Composable
     fun NoteLazyColumn() {
         val localNoteList = viewModel.localNoteList.collectAsStateWithLifecycle()
-        Log.i("test", "note lazycolumn recomp")
-
 
         LazyColumn (
             modifier = Modifier
@@ -186,9 +189,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
         val borderColor = Theme.themeColorsList[viewModel.getColorTheme].noteBorder
         val textColor = Theme.themeColorsList[viewModel.getColorTheme].noteText
-
-        Log.i("test", "edit mode is ${viewModel.getNoteEditMode}")
-
 
         Card(modifier = Modifier
             .fillMaxSize()

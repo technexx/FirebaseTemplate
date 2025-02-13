@@ -27,7 +27,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         return noteList
     }
 
-    suspend fun noteListFromDatabaseStorage(): List<NoteContents> {
+    private suspend fun noteListFromDatabaseStorage(): List<NoteContents> {
         val noteHolder = mutableListOf<NoteContents>()
 
         val dbContents = getAllNotesFromDatabase()
