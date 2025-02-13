@@ -39,8 +39,8 @@ object Theme {
             highlightedNoteBackGround = R.color.blue_400,
             noteBorder = R.color.black,
             noteText = R.color.black,
-            textFieldColor = R.color.grey_400,
-            textFieldCursorColor = R.color.grey_400,
+            textFieldColor = R.color.yellow_1,
+            textFieldCursorColor = R.color.grey_300,
             textFieldPlaceHolderTextColor = R.color.black,
             iconBackground = R.color.black
         ),

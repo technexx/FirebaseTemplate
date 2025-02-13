@@ -306,7 +306,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 TextField(modifier = Modifier,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     value = bodyTxtField,
-                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Note")) },
+                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(bodyTxtField, "Note")) },
                     onValueChange = {
                         bodyTxtField = it
                     },
