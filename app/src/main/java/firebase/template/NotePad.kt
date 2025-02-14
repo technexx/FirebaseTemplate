@@ -75,7 +75,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MainBoard() {
-//        val colorTheme = viewModel.colorTheme.collectAsStateWithLifecycle()
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
@@ -105,10 +104,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         } else {
                             MaterialIconButton(
                                 icon = Icons.Filled.Menu,
-                                description = "back arrow",
+                                description = "menu",
                                 tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
                             ) {
-
                             }
                         }
                     },
@@ -122,6 +120,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                 coroutineScope.launch {
                                     roomInteraction.deleteSelectedNotesFromDatabase()
                                     viewModel.removeFromLocalNotesList()
+                                    viewModel.updateNoteEditMode(false)
                                 }
                             }
                         }
@@ -274,16 +273,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
         AnimatedComposable(
             backHandler = {
-                if (titleTxtField.isBlank()) titleTxtField = "Untitled"
-                val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, dateTime(), false)
-                viewModel.addToLocalNoteList(newNote)
-                viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-
-                Log.i("test", "id of local note added is ${newNote.id}")
-
                 coroutineScope.launch {
-                    val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
-                    roomInteraction.insertNoteIntoDatabase(databaseNote)
+                    addNoteToLocalListAndDatabase(bodyTxtField = bodyTxtField)
                 }
             }
         ) {
@@ -336,6 +327,16 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 )
             }
         }
+    }
+
+    private suspend fun addNoteToLocalListAndDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
+        Log.i("test","title is $titleTxtField")
+        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, dateTime(), false)
+        viewModel.addToLocalNoteList(newNote)
+        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+
+        val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
+        roomInteraction.insertNoteIntoDatabase(databaseNote)
     }
 
     private fun dateTime(): String {

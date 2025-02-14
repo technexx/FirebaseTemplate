@@ -16,8 +16,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
     suspend fun insertNoteIntoDatabase(noteData: NoteData) {
         withContext(Dispatchers.IO) {
             notesDao.insertNote(noteData)
-            Log.i("test", "db is ${databaseNoteList()}")
-
+//            Log.i("test", "db is ${databaseNoteList()}")
         }
     }
 
@@ -49,11 +48,9 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
             for (i in databaseNoteList) {
                 if (idList.contains(i.id)) {
                     notesDao.deleteNotes(i)
-                    Log.i("test", "deleting note $i with id of ${i.id}")
                 }
             }
-
-            Log.i("test", "db is ${databaseNoteList()}")
+//            Log.i("test", "db is ${databaseNoteList()}")
         }
     }
 
