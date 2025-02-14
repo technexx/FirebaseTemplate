@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -89,12 +90,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
                     ),
                     title = {
-                        Text("Meal Decider")
+                        Text("Notepad")
                     },
                     navigationIcon = {
                         if (editMode.value) {
                             MaterialIconButton(
-                                icon = Icons.Filled.KeyboardArrowLeft,
+                                icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                                 description = "back arrow",
                                 tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
                             ) {
@@ -145,24 +146,27 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     //This should recompose child composables.
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
-                {
-                    Column {
-                        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                            NoteLazyColumn()
-                            Spacer(modifier = Modifier.weight(1f))
-                            Row(modifier = Modifier
-                                .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End) {
-                                AddButton(modifier = Modifier
-                                    .size(50.dp))
-                            }
-                        }
 
-                        if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
-                            AddNoteScreen()
+                {
+                    if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
+                        NoteLazyColumn()
+                        Row(modifier = Modifier
+                            .fillMaxSize(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.Bottom) {
+                            AddButton(modifier = Modifier
+                                .size(50.dp))
                         }
                     }
-                }            }
+
+                    if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
+                        AddNoteScreen()
+                    }
+                    Column {
+
+                    }
+                }
+            }
         }
     }
 
@@ -251,9 +255,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 },
                 modifier = modifier,
                 shape = CircleShape,
-                border = BorderStroke(4.dp, Color.Blue),
+                border = BorderStroke(4.dp, colorResource(R.color.grey_500)),
                 contentPadding = PaddingValues(0.dp),  //avoid the little icon
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.orange_1),
+                    contentColor = Color.Black),
             ) {
                 Icon(Icons.Default.Add, contentDescription = "content description")
             }

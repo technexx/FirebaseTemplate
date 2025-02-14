@@ -33,7 +33,7 @@ object Theme {
         //Light
         Themes.Companion.ColorTheme(
             primaryColor = R.color.black,
-            topBarBackground = R.color.brown_1,
+            topBarBackground = R.color.orange_1,
             notePadBackground = R.color.yellow_1,
             noteBackground = R.color.yellow_2,
             highlightedNoteBackGround = R.color.blue_400,
