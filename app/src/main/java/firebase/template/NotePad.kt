@@ -67,8 +67,10 @@ import java.util.Date
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.delay
+import java.sql.Time
+import java.util.Locale
 
-//TODO: Add button covered when notes get to bottom.
+//TODO: Notes should be sorted by most recent automatically.
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
@@ -331,7 +333,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
     private suspend fun addNoteToLocalListAndDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
         Log.i("test","title is $titleTxtField")
-        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, dateTime(), false)
+        val date = Date()
+        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formatTime(date, "hh:mm a"), false)
         viewModel.addToLocalNoteList(newNote)
         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
@@ -339,9 +342,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         roomInteraction.insertNoteIntoDatabase(databaseNote)
     }
 
-    private fun dateTime(): String {
+    private fun formatTime(time: Date, pattern: String): String {
         val date = SimpleDateFormat.getDateInstance()
-        return date.format(Date())
+
+        val formatter = SimpleDateFormat(pattern, Locale.getDefault())
+        return date.format(Date()) + " - " + formatter.format(time)
     }
 }
 
