@@ -64,6 +64,11 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.delay
+
+//TODO: Add button covered when notes get to bottom.
+//TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -267,12 +272,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, dateTime(), false)
                 viewModel.addToLocalNoteList(newNote)
                 viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+
                 Log.i("test", "id of local note added is ${newNote.id}")
 
                 coroutineScope.launch {
                     val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
                     roomInteraction.insertNoteIntoDatabase(databaseNote)
-                    Log.i("test", "id of db note added is ${newNote.id}")
                 }
             }
         ) {

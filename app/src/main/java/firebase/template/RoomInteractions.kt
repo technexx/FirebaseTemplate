@@ -16,19 +16,20 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
     suspend fun insertNoteIntoDatabase(noteData: NoteData) {
         withContext(Dispatchers.IO) {
             notesDao.insertNote(noteData)
+            Log.i("test", "db is ${databaseNoteList()}")
+
         }
     }
 
-    private suspend fun databaseNoteList(): List<NoteData> {
+    suspend fun databaseNoteList(): List<NoteData> {
         var noteList: List<NoteData>
         withContext(Dispatchers.IO) {
-            notesDao.getAllNotesData()
             noteList = notesDao.getAllNotesData()
         }
         return noteList
     }
 
-    private suspend fun localNoteListFromDatabaseStorage(): List<NoteContents> {
+    suspend fun localNoteListFromDatabaseStorage(): List<NoteContents> {
         val noteHolder = mutableListOf<NoteContents>()
 
         val dbContents = databaseNoteList()
@@ -41,17 +42,18 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
 
     suspend fun deleteSelectedNotesFromDatabase() {
         withContext(Dispatchers.IO) {
-//            val databaseNoteList = getDatabaseNoteListFromLocalNoteList()
             val databaseNoteList = databaseNoteList()
             val idList = listOfIdsOfSelectedNotes()
+            Log.i("test", "id list is $idList")
 
             for (i in databaseNoteList) {
-//                notesDao.deleteNotes(i)
                 if (idList.contains(i.id)) {
                     notesDao.deleteNotes(i)
                     Log.i("test", "deleting note $i with id of ${i.id}")
                 }
             }
+
+            Log.i("test", "db is ${databaseNoteList()}")
         }
     }
 
@@ -64,7 +66,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         return databaseNoteList
     }
 
-    fun listOfIdsOfSelectedNotes(): List<Int> {
+    private fun listOfIdsOfSelectedNotes(): List<Int> {
         val localNoteList = viewModel.getLocalNoteList
         val listOfSelectedIds = mutableListOf<Int>()
         for (i in localNoteList) {
@@ -76,7 +78,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
     suspend fun populateLocalNoteListFromDatabase() {
         val localList = mutableListOf<NoteContents>()
         for (i in localNoteListFromDatabaseStorage()) {
-            localList.add(NoteContents(viewModel.getLocalNoteList.size -1, i.title, i.body, i.lastEdited, false))
+            localList.add(NoteContents(i.id, i.title, i.body, i.lastEdited, false))
         }
         viewModel.updateLocalNoteList(localList)
     }
