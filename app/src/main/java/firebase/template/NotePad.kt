@@ -332,9 +332,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     }
 
     private suspend fun addNoteToLocalListAndDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
-        Log.i("test","title is $titleTxtField")
-        val date = Date()
-        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formatTime(date, "hh:mm a"), false)
+        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
         viewModel.addToLocalNoteList(newNote)
         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
@@ -342,11 +340,18 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         roomInteraction.insertNoteIntoDatabase(databaseNote)
     }
 
-    private fun formatTime(time: Date, pattern: String): String {
-        val date = SimpleDateFormat.getDateInstance()
+    private fun formattedDateAndTime(): String{
+        return formattedDate() + " - " + formattedTime()
+    }
 
-        val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-        return date.format(Date()) + " - " + formatter.format(time)
+    private fun formattedTime(): String {
+        val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        return formatter.format(Date())
+    }
+
+    private fun formattedDate(): String {
+        val date = SimpleDateFormat.getDateInstance()
+        return date.format(Date())
     }
 }
 

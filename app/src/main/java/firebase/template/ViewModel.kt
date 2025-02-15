@@ -1,7 +1,9 @@
 package firebase.template
 
+import android.os.Build
 import android.util.Log
 import android.util.Log.i
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import firebase.template.Database.NoteData
@@ -11,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ViewModel : ViewModel() {
     val NOTE_LIST_SCREEN = 0
@@ -60,7 +64,6 @@ class ViewModel : ViewModel() {
             if (i.isSelected) newList.remove(i)
         }
         updateLocalNoteList(newList)
-
     }
 
     //Using new list with new copies of each NoteContent item to trigger recomposition.
@@ -93,6 +96,25 @@ class ViewModel : ViewModel() {
             if (i.isSelected) return true
         }
         return false
+    }
+
+//    fun sortLocalNoteListByMostRecent() {
+//        val list = getNewCopyOfLocalNoteList()
+//        val formattedDateList: MutableList<String>
+//        for (i in list) {
+//            formattedDateList.add((i.lastEdited))
+//        }
+//    }
+
+    //Requires API 26+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun sortDateStrings(dateStrings: List<String>): List<String> {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val dates = dateStrings.map { LocalDate.parse(it, formatter) }
+        val sortedDates = dates.sortedDescending()
+        return sortedDates.map {
+            formatter.format(it)
+        }
     }
 
     val getColorTheme get() = colorTheme.value
