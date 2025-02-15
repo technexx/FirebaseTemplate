@@ -1,5 +1,6 @@
 package firebase.template
 
+import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -68,6 +69,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.delay
 import java.sql.Time
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 //TODO: Notes should be sorted by most recent automatically.
@@ -350,8 +353,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     }
 
     private fun formattedDate(): String {
-        val date = SimpleDateFormat.getDateInstance()
-        return date.format(Date())
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+        } else {
+            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date())
+        }
     }
 }
 
