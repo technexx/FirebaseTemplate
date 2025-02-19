@@ -98,18 +98,25 @@ class ViewModel : ViewModel() {
         return false
     }
 
-//    fun sortLocalNoteListByMostRecent() {
-//        val list = getNewCopyOfLocalNoteList()
-//        val formattedDateList: MutableList<String>
-//        for (i in list) {
-//            formattedDateList.add((i.lastEdited))
-//        }
-//    }
+    fun sortLocalNoteListByMostRecent() {
+        val list = getNewCopyOfLocalNoteList()
+        val dateOnlyList = emptyList<String>().toMutableList()
+
+        for (i in list) {
+            Log.i("test", "full date is ${i.lastEdited}")
+
+            val array = i.lastEdited.split(" - ")
+            Log.i("test", "date split is $array")
+
+            dateOnlyList.add(array[0])
+        }
+        Log.i("test", "date only list is $dateOnlyList")
+    }
 
     //Requires API 26+
     @RequiresApi(Build.VERSION_CODES.O)
     fun sortDateStrings(dateStrings: List<String>): List<String> {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
         val dates = dateStrings.map { LocalDate.parse(it, formatter) }
         val sortedDates = dates.sortedDescending()
         return sortedDates.map {

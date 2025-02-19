@@ -279,8 +279,10 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         AnimatedComposable(
             backHandler = {
                 coroutineScope.launch {
-                    addNoteToLocalListAndDatabase(bodyTxtField = bodyTxtField)
+                    addNoteToLocalListAndDatabase(titleTxtField, bodyTxtField = bodyTxtField)
                 }
+                viewModel.sortLocalNoteListByMostRecent()
+
             }
         ) {
             Column(modifier = Modifier
@@ -336,6 +338,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
     private suspend fun addNoteToLocalListAndDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
         val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
+        Log.i("test", "title field is $titleTxtField and note is $newNote")
         viewModel.addToLocalNoteList(newNote)
         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
