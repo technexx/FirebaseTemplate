@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -24,6 +25,8 @@ class ViewModel : ViewModel() {
     val NOTE_LIST_SCREEN = 0
     val ADD_NOTE_SCREEN = 1
     val dateStringFormat = "MMM dd, yyyy"
+    val timeStringFormat = "hh:mm a"
+    val dateAndTimeStringFormat = "MMM dd, yyyy - hh:mm a"
 
     private val _colorTheme = MutableStateFlow(0)
     val colorTheme: StateFlow<Int> = _colorTheme.asStateFlow()
@@ -103,57 +106,31 @@ class ViewModel : ViewModel() {
         return false
     }
 
-    //TODO: Sort by time as well, and then:
     //TODO: Put sorted dates into note contents object and update its stateflow.
     @RequiresApi(Build.VERSION_CODES.O)
     fun sortLocalNoteListByMostRecent() {
-        val list = getNewCopyOfLocalNoteList()
-        val dateOnlyList = emptyList<String>().toMutableList()
-        val timeOnlyList = emptyList<String>().toMutableList()
-
-        for (i in list) {
-            val array = i.lastEdited.split(" - ")
-            dateOnlyList.add(array[0])
-            timeOnlyList.add(array[1])
+        val dateAndTimeList = emptyList<String>().toMutableList()
+        for (i in getLocalNoteList) {
+            dateAndTimeList.add(i.lastEdited)
         }
-        val sortedDates = sortDateStrings(dateOnlyList)
-        val sortedTimes = sortDateTimes(timeOnlyList, "hh:mm a")
+        val sortedDateAndTimeList = sortDateTimeStrings(dateAndTimeList, dateAndTimeStringFormat)
 
-        Log.i("test", "dates are $dateOnlyList")
-        Log.i("test", "times are $timeOnlyList")
     }
 
-    private fun sortDateStrings(dateStrings: List<String>): List<String> {
+    fun sortDateTimeStrings(dateTimeStrings: List<String>, pattern: String): List<String> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // API 26+
-            val formatter = DateTimeFormatter.ofPattern(dateStringFormat)
-            val dates = dateStrings.map { LocalDate.parse(it, formatter) }
-            val sortedDates = dates.sorted()
-            sortedDates.map { formatter.format(it) }
+            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
+            val dateTimes = dateTimeStrings.map { LocalDateTime.parse(it, formatter) }
+            val sortedDateTimes = dateTimes.sortedDescending()
+            sortedDateTimes.map { it.format(formatter) }
         } else {
             // API < 26
-            val formatter = SimpleDateFormat(dateStringFormat, Locale.getDefault())
-            val dates = dateStrings.map {
-                formatter.parse(it)?.time
-            }
-            val sortedDates = dates.filterNotNull().sortedDescending()
-            sortedDates.map { Date(it).toString() }
-        }
-    }
-
-    private fun sortDateTimes(timeStrings: List<String>, pattern: String): List<String> {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val formatter = DateTimeFormatter.ofPattern(pattern)
-            val times = timeStrings.map { LocalTime.parse(it, formatter) }
-            val sortedTimes = times.sorted() // Or sortedDescending()
-            sortedTimes.map { it.format(formatter) }
-        } else {
             val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-            val dates = timeStrings.mapNotNull { formatter.parse(it) } // Parse to Date
-            val sortedDates = dates.sortedBy { it.time } // Sort by milliseconds
-            sortedDates.map { formatter.format(it) } // Format back to string
+            val dates = dateTimeStrings.mapNotNull { formatter.parse(it) }
+            val sortedDates = dates.sortedByDescending { it.time }
+            sortedDates.map { formatter.format(it) }
         }
-
     }
 
     val getColorTheme get() = colorTheme.value
