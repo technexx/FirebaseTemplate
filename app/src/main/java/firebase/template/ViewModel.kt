@@ -96,6 +96,7 @@ class ViewModel : ViewModel() {
     }
 
     fun getLocalNoteListWithNewNoteAdded(titleTxtField: String = "Untitled", bodyTxtField: String): MutableList<NoteContents> {
+        Log.i("test", "ignored text field is $titleTxtField")
         val newNote = NoteContents(getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
         val noteList = getNewCopyOfLocalNoteList()
         val newList = SnapshotStateList<NoteContents>()

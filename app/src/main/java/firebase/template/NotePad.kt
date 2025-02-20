@@ -73,7 +73,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-//TODO: Notes should be sorted by most recent automatically.
+//TODO: Animate windows instead of contents.
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
@@ -272,7 +272,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
     @Composable
     fun AddNoteScreen() {
-        var titleTxtField by remember { mutableStateOf("") }
+        var titleTxtField by remember { mutableStateOf("Untitled") }
         var bodyTxtField by remember { mutableStateOf("") }
         val coroutineScope = rememberCoroutineScope()
 
