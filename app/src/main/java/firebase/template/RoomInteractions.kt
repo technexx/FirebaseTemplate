@@ -39,18 +39,24 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         return noteHolder
     }
 
+    suspend fun addNoteToDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
+        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
+        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+
+        val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
+        insertNoteIntoDatabase(databaseNote)
+    }
+
     suspend fun deleteSelectedNotesFromDatabase() {
         withContext(Dispatchers.IO) {
             val databaseNoteList = databaseNoteList()
             val idList = listOfIdsOfSelectedNotes()
-            Log.i("test", "id list is $idList")
 
             for (i in databaseNoteList) {
                 if (idList.contains(i.id)) {
                     notesDao.deleteNotes(i)
                 }
             }
-//            Log.i("test", "db is ${databaseNoteList()}")
         }
     }
 

@@ -24,9 +24,6 @@ import java.util.Locale
 class ViewModel : ViewModel() {
     val NOTE_LIST_SCREEN = 0
     val ADD_NOTE_SCREEN = 1
-    val dateStringFormat = "MMM dd, yyyy"
-    val timeStringFormat = "hh:mm a"
-    val dateAndTimeStringFormat = "MMM dd, yyyy - hh:mm a"
 
     private val _colorTheme = MutableStateFlow(0)
     val colorTheme: StateFlow<Int> = _colorTheme.asStateFlow()
@@ -54,14 +51,6 @@ class ViewModel : ViewModel() {
 
     fun updateNoteEditMode(isActive: Boolean) {
         _noteEditMode.value = isActive
-    }
-
-    fun addToLocalNoteList(note: NoteContents) {
-        val noteList = getLocalNoteList
-        val newList = SnapshotStateList<NoteContents>()
-        newList.addAll(noteList)
-        newList.add(note)
-        updateLocalNoteList(newList)
     }
 
     fun removeFromLocalNotesList() {
@@ -106,10 +95,17 @@ class ViewModel : ViewModel() {
         return false
     }
 
-    fun sortLocalNoteListByMostRecent() {
-        val localNoteList = getNewCopyOfLocalNoteList()
-        val sortedLocalNoteList = sortDataObjectsByDateTime(localNoteList, dateAndTimeStringFormat)
-        updateLocalNoteList(sortedLocalNoteList)
+    fun getLocalNoteListWithNewNoteAdded(titleTxtField: String = "Untitled", bodyTxtField: String): MutableList<NoteContents> {
+        val newNote = NoteContents(getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
+        val noteList = getNewCopyOfLocalNoteList()
+        val newList = SnapshotStateList<NoteContents>()
+        newList.addAll(noteList)
+        newList.add(newNote)
+        return newList
+    }
+
+    fun getLocalNoteListSortedByMostRecent(list: MutableList<NoteContents>): List<NoteContents> {
+        return sortDataObjectsByDateTime(list, dateAndTimeStringFormat)
     }
 
     fun sortDataObjectsByDateTime(

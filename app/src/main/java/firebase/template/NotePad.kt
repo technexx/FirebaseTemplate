@@ -279,9 +279,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         AnimatedComposable(
             backHandler = {
                 coroutineScope.launch {
-                    addNoteToLocalListAndDatabase(titleTxtField, bodyTxtField = bodyTxtField)
+                    roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
                 }
-                viewModel.sortLocalNoteListByMostRecent()
+                val newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
+                val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
+                viewModel.updateLocalNoteList(sortedLocalList)
+                Log.i("test", "sorted list is $sortedLocalList")
             }
         ) {
             Column(modifier = Modifier
@@ -335,30 +338,5 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         }
     }
 
-    private suspend fun addNoteToLocalListAndDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
-        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
-        viewModel.addToLocalNoteList(newNote)
-        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-
-        val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
-        roomInteraction.insertNoteIntoDatabase(databaseNote)
-    }
-
-    private fun formattedDateAndTime(): String{
-        return formattedDate() + " - " + formattedTime()
-    }
-
-    private fun formattedTime(): String {
-        val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-        return formatter.format(Date())
-    }
-
-    private fun formattedDate(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LocalDate.now().format(DateTimeFormatter.ofPattern(viewModel.dateStringFormat))
-        } else {
-            SimpleDateFormat(viewModel.dateStringFormat, Locale.getDefault()).format(Date())
-        }
-    }
 }
 
