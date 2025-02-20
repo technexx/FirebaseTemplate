@@ -282,7 +282,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     addNoteToLocalListAndDatabase(titleTxtField, bodyTxtField = bodyTxtField)
                 }
                 viewModel.sortLocalNoteListByMostRecent()
-
             }
         ) {
             Column(modifier = Modifier

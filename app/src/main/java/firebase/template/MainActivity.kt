@@ -26,6 +26,7 @@ private lateinit var activity: Activity
 @SuppressLint("StaticFieldLeak")
 private lateinit var appContext : Context
 val ioScope = CoroutineScope(Job() + Dispatchers.IO)
+val mainScope = CoroutineScope(Job() + Dispatchers.Main)
 private lateinit var viewModel : ViewModel
 private lateinit var noteDatabase: NotesDatabase.AppDatabase
 private lateinit var roomInteractions: RoomInteractions

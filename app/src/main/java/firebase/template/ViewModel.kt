@@ -106,30 +106,24 @@ class ViewModel : ViewModel() {
         return false
     }
 
-    //TODO: Put sorted dates into note contents object and update its stateflow.
-    @RequiresApi(Build.VERSION_CODES.O)
     fun sortLocalNoteListByMostRecent() {
-        val dateAndTimeList = emptyList<String>().toMutableList()
-        for (i in getLocalNoteList) {
-            dateAndTimeList.add(i.lastEdited)
-        }
-        val sortedDateAndTimeList = sortDateTimeStrings(dateAndTimeList, dateAndTimeStringFormat)
-
+        val localNoteList = getNewCopyOfLocalNoteList()
+        val sortedLocalNoteList = sortDataObjectsByDateTime(localNoteList, dateAndTimeStringFormat)
+        updateLocalNoteList(sortedLocalNoteList)
     }
 
-    fun sortDateTimeStrings(dateTimeStrings: List<String>, pattern: String): List<String> {
+    fun sortDataObjectsByDateTime(
+        dataObjects: MutableList<NoteContents>,
+        pattern: String
+    ): List<NoteContents> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // API 26+
             val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
-            val dateTimes = dateTimeStrings.map { LocalDateTime.parse(it, formatter) }
-            val sortedDateTimes = dateTimes.sortedDescending()
-            sortedDateTimes.map { it.format(formatter) }
+            dataObjects.sortedBy { LocalDateTime.parse(it.lastEdited, formatter) }
         } else {
             // API < 26
             val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-            val dates = dateTimeStrings.mapNotNull { formatter.parse(it) }
-            val sortedDates = dates.sortedByDescending { it.time }
-            sortedDates.map { formatter.format(it) }
+            dataObjects.sortedBy { formatter.parse(it.lastEdited)?.time ?: 0 }
         }
     }
 
