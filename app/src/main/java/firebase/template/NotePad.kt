@@ -338,7 +338,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
     private suspend fun addNoteToLocalListAndDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
         val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
-        Log.i("test", "title field is $titleTxtField and note is $newNote")
         viewModel.addToLocalNoteList(newNote)
         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
 
@@ -357,9 +356,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
     private fun formattedDate(): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+            LocalDate.now().format(DateTimeFormatter.ofPattern(viewModel.dateStringFormat))
         } else {
-            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date())
+            SimpleDateFormat(viewModel.dateStringFormat, Locale.getDefault()).format(Date())
         }
     }
 }
