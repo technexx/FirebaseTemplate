@@ -1,7 +1,9 @@
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id ("com.google.devtools.ksp")
+    id ("com.google.gms.google-services")
 //    id("com.google.dagger.hilt.android")
 //    id("kotlin-kapt")
 }
@@ -64,7 +66,13 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    // Add the dependency for the Realtime Database library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-storage-ktx:21.0.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
@@ -85,4 +93,5 @@ dependencies {
     implementation ("com.google.maps.android:android-maps-utils:0.5")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
     implementation ("com.google.android.gms:play-services-location:21.3.0")
+//    implementation ("com.google.gms:google-services:4.4.2")
 }

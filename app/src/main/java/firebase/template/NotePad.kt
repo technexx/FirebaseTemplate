@@ -70,12 +70,6 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.delay
-import java.sql.Time
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 //TODO: Animate windows instead of contents.
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
