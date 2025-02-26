@@ -41,8 +41,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.i("test", "hi")
-
         activity = this@MainActivity
         appContext = applicationContext
         viewModel = ViewModel()
@@ -59,7 +57,7 @@ class MainActivity : ComponentActivity() {
         ioScope.launch {
             roomInteractions.populateLocalNoteListFromDatabase()
             //Testing db upload
-            uploadDatabase(appContext, "room_database")
+            uploadDatabase(appContext, "notes-database")
         }
 
         setContent {
@@ -80,12 +78,14 @@ class MainActivity : ComponentActivity() {
 suspend fun uploadDatabase(context: Context, databaseName: String) {
     val storage = Firebase.storage
 
-    // Create a reference to 'images/mountains.jpg'
-    val storageRef = storage.reference.child("data/data/firebase.template/databases/$databaseName.db")
-    val notesDatabaseShm = storage.reference.child("data/data/firebase.template/databases/notes-database-shm")
-    val notesDatabaseWal = storage.reference.child("data/data/firebase.template/databases/notes-database-wal")
+    val databaseFile = context.getDatabasePath("$databaseName")
+    println("our db is $databaseFile")
+    println("path is ${databaseFile.absolutePath}")
 
-    val databaseFile = context.getDatabasePath("$databaseName.db")
+    //This is the directory in cloud storage where we will store database.
+    val storageRef = storage.reference.child("databases/our_notes_database/$databaseName")
+
+
     if (databaseFile == null || !databaseFile.exists()) {
         println("database file does not exist")
         return;
