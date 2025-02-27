@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -24,6 +25,7 @@ import firebase.template.ui.theme.FirebaseTemplateTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -56,8 +58,9 @@ class MainActivity : ComponentActivity() {
 
         ioScope.launch {
             roomInteractions.populateLocalNoteListFromDatabase()
-            //Testing db upload
-            uploadDatabase(appContext, "notes-database")
+            //Testing db uploadAppDatabase
+//            delay(2000)
+//            uploadDatabase(appContext, "notes-database")
         }
 
         setContent {
@@ -78,9 +81,8 @@ class MainActivity : ComponentActivity() {
 suspend fun uploadDatabase(context: Context, databaseName: String) {
     val storage = Firebase.storage
 
-    val databaseFile = context.getDatabasePath("$databaseName")
+    val databaseFile = context.getDatabasePath(databaseName)
     println("our db is $databaseFile")
-    println("path is ${databaseFile.absolutePath}")
 
     //This is the directory in cloud storage where we will store database.
     val storageRef = storage.reference.child("databases/our_notes_database/$databaseName")
@@ -100,7 +102,6 @@ suspend fun uploadDatabase(context: Context, databaseName: String) {
         println("Database upload failed: ${e.message}")
         e.printStackTrace()
     }
-
 }
 
 @Composable

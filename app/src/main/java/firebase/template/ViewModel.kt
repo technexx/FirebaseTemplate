@@ -23,7 +23,13 @@ import java.util.Locale
 
 class ViewModel : ViewModel() {
     val NOTE_LIST_SCREEN = 0
-    val ADD_NOTE_SCREEN = 1
+    val NOTE_SCREEN = 1
+
+    var NOTE_SCREEN_MODE = 0
+    val ADDING_NOTE = 0
+    val EDITING_NOTE = 1
+
+    var selectedNoteIndex: Int = 0
 
     private val _colorTheme = MutableStateFlow(0)
     val colorTheme: StateFlow<Int> = _colorTheme.asStateFlow()
@@ -51,6 +57,14 @@ class ViewModel : ViewModel() {
 
     fun updateNoteEditMode(isActive: Boolean) {
         _noteEditMode.value = isActive
+    }
+
+    fun savedNoteTitle(noteIndex: Int): String {
+        return getNewCopyOfLocalNoteList()[noteIndex].title
+    }
+
+    fun savedNoteBody(noteIndex: Int): String {
+        return getNewCopyOfLocalNoteList()[noteIndex].body
     }
 
     fun removeFromLocalNotesList() {
@@ -109,7 +123,7 @@ class ViewModel : ViewModel() {
         return sortDataObjectsByDateTime(list, dateAndTimeStringFormat)
     }
 
-    fun sortDataObjectsByDateTime(
+    private fun sortDataObjectsByDateTime(
         dataObjects: MutableList<NoteContents>,
         pattern: String
     ): List<NoteContents> {

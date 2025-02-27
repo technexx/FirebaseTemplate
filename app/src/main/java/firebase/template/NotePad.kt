@@ -161,8 +161,10 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         }
                     }
 
-                    if (currentScreen.value == viewModel.ADD_NOTE_SCREEN) {
-                        AddNoteScreen()
+                    if (currentScreen.value == viewModel.NOTE_SCREEN) {
+                        if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
+                            AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
+                        }
                     }
                     Column {
 
@@ -213,6 +215,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             } else {
                                 viewModel.markNoteAsSelectedOrUnselected(true, index)
                             }
+                        } else {
+                            //TODO: Need to pass in title and body strings.
+                            viewModel.selectedNoteIndex = index
+                            viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_NOTE
+                            viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
                         }
                     },
                     onLongPress = {
@@ -253,7 +260,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         Box() {
             OutlinedButton(
                 onClick = {
-                    viewModel.updateCurrentScreen(viewModel.ADD_NOTE_SCREEN)
+                    viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
                 },
                 modifier = modifier,
                 shape = CircleShape,
@@ -269,9 +276,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     }
 
     @Composable
-    fun AddNoteScreen() {
-        var titleTxtField by remember { mutableStateOf("Untitled") }
-        var bodyTxtField by remember { mutableStateOf("") }
+    fun AddNoteScreen(title: String = "Untitled", body: String = "") {
+        var titleTxtField by remember { mutableStateOf(title) }
+        var bodyTxtField by remember { mutableStateOf(body) }
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
         val coroutineScope = rememberCoroutineScope()
