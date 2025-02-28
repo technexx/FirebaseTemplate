@@ -13,13 +13,6 @@ import kotlinx.coroutines.withContext
 class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDatabase.AppDatabase) {
     private val notesDao = notesDatabase.notesDao()
 
-    suspend fun insertNoteIntoDatabase(noteData: NoteData) {
-        withContext(Dispatchers.IO) {
-            notesDao.insertNote(noteData)
-//            Log.i("test", "db is ${databaseNoteList()}")
-        }
-    }
-
     suspend fun databaseNoteList(): List<NoteData> {
         var noteList: List<NoteData>
         withContext(Dispatchers.IO) {
@@ -41,10 +34,31 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
 
     suspend fun addNoteToDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
         val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
-        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-
+        //Passing local NoteContents object inputs into database NoteData object.
         val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
         insertNoteIntoDatabase(databaseNote)
+    }
+
+    suspend fun insertNoteIntoDatabase(noteData: NoteData) {
+        withContext(Dispatchers.IO) {
+            notesDao.insertNote(noteData)
+        }
+    }
+
+    suspend fun editNoteInDatabase(index: Int, title: String, body: String) {
+        val noteList = viewModel.getNewCopyOfLocalNoteList()
+        noteList[index].title = title
+        noteList[index].body = body
+        val databaseNote = NoteData(null, noteList[index].id, noteList[index].title, noteList[index].body, noteList[index].lastEdited)
+        updateNoteInDatabase(databaseNote)
+
+        println("update note is $databaseNote")
+    }
+
+    suspend fun updateNoteInDatabase(note: NoteData) {
+        withContext(Dispatchers.IO) {
+            notesDao.updateNotes(note)
+        }
     }
 
     suspend fun deleteSelectedNotesFromDatabase() {

@@ -216,7 +216,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                 viewModel.markNoteAsSelectedOrUnselected(true, index)
                             }
                         } else {
-                            //TODO: Need to pass in title and body strings.
+                            //If not in edit mode, retrieve selected note.
                             viewModel.selectedNoteIndex = index
                             viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_NOTE
                             viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
@@ -286,12 +286,22 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         AnimatedComposable(
             backHandler = {
                 coroutineScope.launch {
-                    roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
+                    var newLocalList = emptyList<NoteContents>().toMutableList()
+
+                    if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
+                        newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
+                        roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
+                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    }
+                    if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
+                        newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+                        roomInteraction.editNoteInDatabase(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    }
+
+                    val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
+                    viewModel.updateLocalNoteList(sortedLocalList)
                 }
-                val newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
-                val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
-                viewModel.updateLocalNoteList(sortedLocalList)
-                Log.i("test", "sorted list is $sortedLocalList")
             }
         ) {
             Column(modifier = Modifier

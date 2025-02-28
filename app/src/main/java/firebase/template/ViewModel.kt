@@ -93,7 +93,7 @@ class ViewModel : ViewModel() {
         updateLocalNoteList(localNoteList)
     }
 
-    private fun getNewCopyOfLocalNoteList(): SnapshotStateList<NoteContents> {
+    fun getNewCopyOfLocalNoteList(): SnapshotStateList<NoteContents> {
         val newList = SnapshotStateList<NoteContents>()
         for (i in getLocalNoteList.indices) {
             newList.add(NoteContents(getLocalNoteList[i].id, getLocalNoteList[i].title, getLocalNoteList[i].body, getLocalNoteList[i].lastEdited, getLocalNoteList[i].isSelected))
@@ -110,13 +110,19 @@ class ViewModel : ViewModel() {
     }
 
     fun getLocalNoteListWithNewNoteAdded(titleTxtField: String = "Untitled", bodyTxtField: String): MutableList<NoteContents> {
-        Log.i("test", "ignored text field is $titleTxtField")
-        val newNote = NoteContents(getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
-        val noteList = getNewCopyOfLocalNoteList()
-        val newList = SnapshotStateList<NoteContents>()
-        newList.addAll(noteList)
-        newList.add(newNote)
-        return newList
+        val noteToAdd = NoteContents(getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
+        val oldNoteList = getNewCopyOfLocalNoteList()
+        val newNoteList = SnapshotStateList<NoteContents>()
+        newNoteList.addAll(oldNoteList)
+        newNoteList.add(noteToAdd)
+        return newNoteList
+    }
+
+    fun getLocalNoteListWithNoteEdited(index: Int, titleTxtField: String, bodyTxtField: String): MutableList<NoteContents> {
+        val oldNoteList = getNewCopyOfLocalNoteList()
+        oldNoteList[index].title = titleTxtField
+        oldNoteList[index].body = bodyTxtField
+        return oldNoteList
     }
 
     fun getLocalNoteListSortedByMostRecent(list: MutableList<NoteContents>): List<NoteContents> {
