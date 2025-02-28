@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
@@ -82,96 +81,119 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
-                        titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
-                    ),
-                    title = {
-                        Text("Notepad")
-                    },
-                    navigationIcon = {
-                        if (editMode.value) {
-                            MaterialIconButton(
-                                icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                description = "back arrow",
-                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
-                            ) {
-                                viewModel.updateNoteEditMode(false)
-                                viewModel.markAllNotesAsUnselected()
-                            }
-                        } else {
-                            MaterialIconButton(
-                                icon = Icons.Filled.Menu,
-                                description = "menu",
-                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
-                            ) {
-                            }
+        AnimatedComposable(
+            backHandler =  {
+                //If we are on a select note.
+                if (viewModel.getCurrentScreen == viewModel.NOTE_SCREEN)
+                    coroutineScope.launch {
+                        var newLocalList = emptyList<NoteContents>().toMutableList()
+                        val titleTxtField = viewModel.titleTxtField
+                        val bodyTxtField = viewModel.bodyTxtField
+
+                        if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
+                            newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
+                            roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
+                            viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
                         }
-                    },
-                    actions = {
-                        if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
-                            MaterialIconButton(
-                                icon = Icons.Filled.Delete,
-                                description = "delete",
-                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
-                            ) {
-                                coroutineScope.launch {
-                                    roomInteraction.deleteSelectedNotesFromDatabase()
-                                    viewModel.removeFromLocalNotesList()
+                        if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
+                            newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+                            roomInteraction.editNoteInDatabase(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+                            viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                        }
+
+                        val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
+                        viewModel.updateLocalNoteList(sortedLocalList)
+                    }
+            }
+        ) {
+            Scaffold(
+                modifier = Modifier
+                    .fillMaxSize(),
+                topBar = {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.mediumTopAppBarColors(
+                            containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
+                            titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
+                        ),
+                        title = {
+                            Text("Notepad")
+                        },
+                        navigationIcon = {
+                            if (editMode.value) {
+                                MaterialIconButton(
+                                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                    description = "back arrow",
+                                    tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                                ) {
                                     viewModel.updateNoteEditMode(false)
+                                    viewModel.markAllNotesAsUnselected()
+                                }
+                            } else {
+                                MaterialIconButton(
+                                    icon = Icons.Filled.Menu,
+                                    description = "menu",
+                                    tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                                ) {
                                 }
                             }
+                        },
+                        actions = {
+                            if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
+                                MaterialIconButton(
+                                    icon = Icons.Filled.Delete,
+                                    description = "delete",
+                                    tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                                ) {
+                                    coroutineScope.launch {
+                                        roomInteraction.deleteSelectedNotesFromDatabase()
+                                        viewModel.removeFromLocalNotesList()
+                                        viewModel.updateNoteEditMode(false)
+                                    }
+                                }
+                            }
+
+                            //For drop down menu.
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentSize(Alignment.TopEnd)
+                            ) {
+
+                            }
+                        },
+                    )
+                },
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .padding(innerPadding),
+                ) {
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        //This should recompose child composables.
+                        .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
+                    )
+                    {
+                        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
+                            NoteLazyColumn()
+                            Row(modifier = Modifier
+                                .fillMaxSize(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.Bottom) {
+                                AddButton(modifier = Modifier
+                                    .size(50.dp))
+                            }
                         }
-
-                        //For drop down menu.
-                        Box(
-                            modifier = Modifier
-                                .wrapContentSize(Alignment.TopEnd)
-                        ) {
-
-                        }
-                    },
-                )
-            },
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding),
-            ) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    //This should recompose child composables.
-                    .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
-                )
-
-                {
-                    if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                        NoteLazyColumn()
-                        Row(modifier = Modifier
-                            .fillMaxSize(),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.Bottom) {
-                            AddButton(modifier = Modifier
-                                .size(50.dp))
+                        if (currentScreen.value == viewModel.NOTE_SCREEN) {
+                            if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
+                                AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
+                            }
                         }
                     }
 
-                    if (currentScreen.value == viewModel.NOTE_SCREEN) {
-                        if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
-                            AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
-                        }
-                    }
-                    Column {
-
-                    }
                 }
             }
         }
+
     }
 
     @Composable
@@ -261,6 +283,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             OutlinedButton(
                 onClick = {
                     viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
+                    viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_NOTE
                 },
                 modifier = modifier,
                 shape = CircleShape,
@@ -283,41 +306,54 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val focusManager = LocalFocusManager.current
         val coroutineScope = rememberCoroutineScope()
 
-        AnimatedComposable(
-            backHandler = {
-                coroutineScope.launch {
-                    var newLocalList = emptyList<NoteContents>().toMutableList()
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = Theme.themeColorsList[0].notePadBackground))) {
 
-                    if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
-                        newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
-                        roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
-                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    }
-                    if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
-                        newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
-                        roomInteraction.editNoteInDatabase(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
-                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    }
+            TextField(modifier = Modifier,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                value = titleTxtField,
+                placeholder = {
+                    Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Title")) },
+                onValueChange = {
+                    titleTxtField = it
+                    viewModel.titleTxtField = it
+                },
+                singleLine = true,
+                textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                colors = TextFieldDefaults.colors(
+                    cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
+                    focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                    unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                    unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                )
+            )
 
-                    val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
-                    viewModel.updateLocalNoteList(sortedLocalList)
-                }
-            }
-        ) {
-            Column(modifier = Modifier
+            HorizontalDivider(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].primaryColor), thickness = 2.dp)
+
+            Box(modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource(id = Theme.themeColorsList[0].notePadBackground))) {
-
-                TextField(modifier = Modifier,
+                .clickable {
+                    focusManager.clearFocus() // Clear focus first
+                    focusRequester.requestFocus()
+                },
+                contentAlignment = Alignment.TopStart,
+            ) {
+                TextField(modifier = Modifier
+                    .focusRequester(focusRequester),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    value = titleTxtField,
-                    placeholder = {
-                        Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Title")) },
+                    value = bodyTxtField,
+                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(bodyTxtField, "Note")) },
                     onValueChange = {
-                        titleTxtField = it
+                        bodyTxtField = it
+                        viewModel.bodyTxtField = it
                     },
                     singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 16.sp),
+
                     colors = TextFieldDefaults.colors(
                         cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
                         focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
@@ -328,39 +364,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
                     )
                 )
-
-                HorizontalDivider(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].primaryColor), thickness = 2.dp)
-
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .clickable {
-                        focusManager.clearFocus() // Clear focus first
-                        focusRequester.requestFocus()
-                    },
-                    contentAlignment = Alignment.TopStart,
-                    ) {
-                    TextField(modifier = Modifier
-                        .focusRequester(focusRequester),
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                        value = bodyTxtField,
-                        placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(bodyTxtField, "Note")) },
-                        onValueChange = {
-                            bodyTxtField = it
-                        },
-                        singleLine = true,
-                        textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 16.sp),
-
-                        colors = TextFieldDefaults.colors(
-                            cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
-                            focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
-                            unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
-                            unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
-                        )
-                    )
-                }
             }
         }
     }

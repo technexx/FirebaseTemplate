@@ -29,6 +29,8 @@ class ViewModel : ViewModel() {
     val ADDING_NOTE = 0
     val EDITING_NOTE = 1
 
+    var titleTxtField = ""
+    var bodyTxtField = ""
     var selectedNoteIndex: Int = 0
 
     private val _colorTheme = MutableStateFlow(0)
