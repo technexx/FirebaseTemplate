@@ -51,8 +51,6 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         noteList[index].body = body
         val databaseNote = NoteData(null, noteList[index].id, noteList[index].title, noteList[index].body, noteList[index].lastEdited)
         updateNoteInDatabase(databaseNote)
-
-        println("update note is $databaseNote")
     }
 
     suspend fun updateNoteInDatabase(note: NoteData) {

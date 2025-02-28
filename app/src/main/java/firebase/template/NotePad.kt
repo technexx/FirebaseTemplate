@@ -70,15 +70,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-//TODO: Animate windows instead of contents.
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun MainBoard() {
+    fun HomeBoard() {
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
-        val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
         AnimatedComposable(
@@ -106,94 +103,188 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     }
             }
         ) {
-            Scaffold(
-                modifier = Modifier
-                    .fillMaxSize(),
-                topBar = {
-                    TopAppBar(
-                        colors = TopAppBarDefaults.mediumTopAppBarColors(
-                            containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
-                            titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
-                        ),
-                        title = {
-                            Text("Notepad")
-                        },
-                        navigationIcon = {
-                            if (editMode.value) {
-                                MaterialIconButton(
-                                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                    description = "back arrow",
-                                    tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
-                                ) {
-                                    viewModel.updateNoteEditMode(false)
-                                    viewModel.markAllNotesAsUnselected()
-                                }
-                            } else {
-                                MaterialIconButton(
-                                    icon = Icons.Filled.Menu,
-                                    description = "menu",
-                                    tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
-                                ) {
-                                }
-                            }
-                        },
-                        actions = {
-                            if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
-                                MaterialIconButton(
-                                    icon = Icons.Filled.Delete,
-                                    description = "delete",
-                                    tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
-                                ) {
-                                    coroutineScope.launch {
-                                        roomInteraction.deleteSelectedNotesFromDatabase()
-                                        viewModel.removeFromLocalNotesList()
-                                        viewModel.updateNoteEditMode(false)
-                                    }
-                                }
-                            }
-
-                            //For drop down menu.
-                            Box(
-                                modifier = Modifier
-                                    .wrapContentSize(Alignment.TopEnd)
-                            ) {
-
-                            }
-                        },
-                    )
-                },
-            ) { innerPadding ->
-                Column(
-                    modifier = Modifier
-                        .padding(innerPadding),
-                ) {
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        //This should recompose child composables.
-                        .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
-                    )
-                    {
-                        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                            NoteLazyColumn()
-                            Row(modifier = Modifier
-                                .fillMaxSize(),
-                                horizontalArrangement = Arrangement.End,
-                                verticalAlignment = Alignment.Bottom) {
-                                AddButton(modifier = Modifier
-                                    .size(50.dp))
-                            }
-                        }
-                        if (currentScreen.value == viewModel.NOTE_SCREEN) {
-                            if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
-                                AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
-                            }
-                        }
-                    }
-
-                }
+            if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
+                NoteListScaffold()
+            }
+            if (currentScreen.value == viewModel.NOTE_SCREEN) {
+                SingleNoteScaffold()
+                println("single note!")
             }
         }
+    }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun NoteListScaffold() {
+        val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
+        val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
+        val coroutineScope = rememberCoroutineScope()
+
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
+                        titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
+                    ),
+                    title = {
+                        Text("Notepad")
+                    },
+                    navigationIcon = {
+                        if (editMode.value) {
+                            MaterialIconButton(
+                                icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                description = "back arrow",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+                                viewModel.updateNoteEditMode(false)
+                                viewModel.markAllNotesAsUnselected()
+                            }
+                        } else {
+                            MaterialIconButton(
+                                icon = Icons.Filled.Menu,
+                                description = "menu",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+                            }
+                        }
+                    },
+                    actions = {
+                        if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
+                            MaterialIconButton(
+                                icon = Icons.Filled.Delete,
+                                description = "delete",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+                                coroutineScope.launch {
+                                    roomInteraction.deleteSelectedNotesFromDatabase()
+                                    viewModel.removeFromLocalNotesList()
+                                    viewModel.updateNoteEditMode(false)
+                                }
+                            }
+                        }
+
+                        //For drop down menu.
+                        Box(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.TopEnd)
+                        ) {
+
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding),
+            ) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    //This should recompose child composables.
+                    .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
+                )
+                {
+                    NoteLazyColumn()
+                    Row(modifier = Modifier
+                        .fillMaxSize(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.Bottom) {
+                        AddButton(modifier = Modifier
+                            .size(50.dp))
+                    }
+                    if (currentScreen.value == viewModel.NOTE_SCREEN) {
+                        if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
+                            AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun SingleNoteScaffold() {
+        val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
+        val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
+        val coroutineScope = rememberCoroutineScope()
+
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].topBarBackground),
+                        titleContentColor = colorResource(Theme.themeColorsList[viewModel.getColorTheme].noteText),
+                    ),
+                    title = {
+                        Text("Notepad")
+                    },
+                    navigationIcon = {
+                        if (editMode.value) {
+                            MaterialIconButton(
+                                icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                description = "back arrow",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+                                viewModel.updateNoteEditMode(false)
+                                viewModel.markAllNotesAsUnselected()
+                            }
+                        } else {
+                            MaterialIconButton(
+                                icon = Icons.Filled.Menu,
+                                description = "menu",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+                            }
+                        }
+                    },
+                    actions = {
+                        if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
+                            MaterialIconButton(
+                                icon = Icons.Filled.Delete,
+                                description = "delete",
+                                tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
+                            ) {
+                                coroutineScope.launch {
+                                    roomInteraction.deleteSelectedNotesFromDatabase()
+                                    viewModel.removeFromLocalNotesList()
+                                    viewModel.updateNoteEditMode(false)
+                                }
+                            }
+                        }
+
+                        //For drop down menu.
+                        Box(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.TopEnd)
+                        ) {
+
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding),
+            ) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    //This should recompose child composables.
+                    .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
+                )
+                {
+                    AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
+                }
+
+            }
+        }
     }
 
     @Composable

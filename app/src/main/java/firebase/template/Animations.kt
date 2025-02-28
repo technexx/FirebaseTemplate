@@ -106,7 +106,48 @@ fun AnimatedComposable(
             contentAnimated()
         }
     }
+}@Composable
+fun AnimatedTransitionVoid(
+    modifier: Modifier = Modifier,
+    any: Any? = Unit,
+    backHandler: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val animateTrigger = remember { mutableStateOf(false) }
+    val coroutineScope: CoroutineScope = rememberCoroutineScope()
+
+    BackHandler {
+        coroutineScope.launch {
+            startDismissWithExitAnimation(animateTrigger, backHandler)
+        }
+    }
+
+    LaunchedEffect(key1 = any) {
+        launch {
+            delay(0)
+            animateTrigger.value = true
+        }
+    }
+
+    Box(
+        modifier = modifier
+    ) {
+        AnimatedScaleInTransition(
+            animationEnter = expandHorizontally (
+                animationSpec = tween(200),
+            ),
+            animationExit = shrinkHorizontally (
+                animationSpec = tween(200),
+            ),
+            visible = animateTrigger.value) {
+            Row() {
+                content()
+            }
+        }
+    }
 }
+
+
 
 //Background color must be set in whichever columns/rows are being used in the content input, otherwise background will be the same as the Box here.
 @Composable
@@ -155,46 +196,6 @@ fun AnimatedTransitionDialog(
     }
 }
 
-@Composable
-fun AnimatedTransitionVoid(
-    modifier: Modifier = Modifier,
-    any: Any? = Unit,
-    backHandler: () -> Unit,
-    content: @Composable () -> Unit,
-) {
-    val animateTrigger = remember { mutableStateOf(false) }
-    val coroutineScope: CoroutineScope = rememberCoroutineScope()
-
-    BackHandler {
-        coroutineScope.launch {
-            startDismissWithExitAnimation(animateTrigger, backHandler)
-        }
-    }
-
-    LaunchedEffect(key1 = any) {
-        launch {
-            delay(0)
-            animateTrigger.value = true
-        }
-    }
-
-    Box(
-        modifier = modifier
-    ) {
-        AnimatedScaleInTransition(
-            animationEnter = expandHorizontally (
-                animationSpec = tween(200),
-            ),
-            animationExit = shrinkHorizontally (
-                animationSpec = tween(200),
-            ),
-            visible = animateTrigger.value) {
-            Row() {
-                content()
-            }
-        }
-    }
-}
 
 @Composable
 fun AnimatedDropDownMenu(
