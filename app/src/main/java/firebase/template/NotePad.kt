@@ -2,6 +2,7 @@ package firebase.template
 
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -78,37 +79,51 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
+        println("homeboard recomp")
+
         AnimatedComposable(
             backHandler =  {
-                //If we are on a select note.
-                if (viewModel.getCurrentScreen == viewModel.NOTE_SCREEN)
-                    coroutineScope.launch {
-                        var newLocalList = emptyList<NoteContents>().toMutableList()
-                        val titleTxtField = viewModel.titleTxtField
-                        val bodyTxtField = viewModel.bodyTxtField
-
-                        if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
-                            newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
-                            roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
-                            viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                        }
-                        if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
-                            newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
-                            roomInteraction.editNoteInDatabase(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
-                            viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                        }
-
-                        val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
-                        viewModel.updateLocalNoteList(sortedLocalList)
-                    }
+                println("backhandler called")
+                if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
+                    viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    println("backHandler from single note screen")
+                }
+                if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
+                    viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    println("backHandler from note list screen")
+                }
             }
         ) {
+            println("homeboard contents recomp")
             if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
                 NoteListScaffold()
+                println("note list composable!")
             }
             if (currentScreen.value == viewModel.NOTE_SCREEN) {
                 SingleNoteScaffold()
-                println("single note!")
+                println("single note composable!")
+            }
+
+            LaunchedEffect(Unit) {
+                coroutineScope.launch {
+                    var newLocalList = emptyList<NoteContents>().toMutableList()
+                    val titleTxtField = viewModel.titleTxtField
+                    val bodyTxtField = viewModel.bodyTxtField
+
+                    if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
+                        newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
+                        roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
+                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    }
+                    if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
+                        newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+                        roomInteraction.editNoteInDatabase(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    }
+
+                    val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
+                    viewModel.updateLocalNoteList(sortedLocalList)
+                }
             }
         }
     }
@@ -187,6 +202,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
+                    BackHandler {
+//                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    }
                     NoteLazyColumn()
                     Row(modifier = Modifier
                         .fillMaxSize(),
@@ -280,6 +298,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
+                    BackHandler {
+//                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                    }
                     AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
                 }
 
