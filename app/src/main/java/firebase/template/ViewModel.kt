@@ -22,9 +22,11 @@ import java.util.Date
 import java.util.Locale
 
 class ViewModel : ViewModel() {
+    //Either list of notes, or single note. Updated as currentScreen stateflow.
     val NOTE_LIST_SCREEN = 0
     val NOTE_SCREEN = 1
 
+    //Applies to single note screen. NOTE_SCREEN_MODE designates whether we are adding or editing a note. Not updated as state flow.
     var NOTE_SCREEN_MODE = 0
     val ADDING_NOTE = 0
     val EDITING_NOTE = 1

@@ -83,18 +83,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
         AnimatedComposable(
             backHandler =  {
-                println("backhandler called")
-                if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
+                if (currentScreen.value == viewModel.NOTE_SCREEN) {
                     viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    println("backHandler from single note screen")
-                }
-                if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
-                    viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    println("backHandler from note list screen")
                 }
             }
         ) {
-            println("homeboard contents recomp")
+            //Content
             if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
                 NoteListScaffold()
                 println("note list composable!")
@@ -104,6 +98,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 println("single note composable!")
             }
 
+            //Other actions
             LaunchedEffect(Unit) {
                 coroutineScope.launch {
                     var newLocalList = emptyList<NoteContents>().toMutableList()
@@ -202,9 +197,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
-                    BackHandler {
-//                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    }
                     NoteLazyColumn()
                     Row(modifier = Modifier
                         .fillMaxSize(),
@@ -288,6 +280,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 )
             },
         ) { innerPadding ->
+
+
             Column(
                 modifier = Modifier
                     .padding(innerPadding),
@@ -298,9 +292,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
-                    BackHandler {
-//                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    }
                     AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
                 }
 

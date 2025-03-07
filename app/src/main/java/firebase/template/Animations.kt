@@ -77,8 +77,8 @@ fun AnimatedComposable(
     val animateTrigger = remember { mutableStateOf(false) }
 
     BackHandler {
-        println("backhandler from animated composable")
         if (!disableBackHandler) {
+            backHandler()
             coroutineScope.launch {
                 startDismissWithExitAnimation(animateTrigger, backHandler)
             }
@@ -105,7 +105,6 @@ fun AnimatedComposable(
             ),
             visible = animateTrigger.value) {
             contentAnimated()
-            println("animated composable content")
         }
     }
 }
