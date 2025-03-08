@@ -89,10 +89,12 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             }
         ) {
             //Content
+            //TODO: Note list animation exits out as it does when initially going from note list to single note.
             if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
                 NoteListScaffold()
                 println("note list composable!")
             }
+            //TODO: Does not animate.
             if (currentScreen.value == viewModel.NOTE_SCREEN) {
                 SingleNoteScaffold()
                 println("single note composable!")
