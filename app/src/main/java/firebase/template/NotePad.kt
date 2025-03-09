@@ -71,7 +71,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-//TODO: Exit fade from note doesn't work.
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {

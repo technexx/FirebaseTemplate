@@ -57,36 +57,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@Composable
-fun FadeInOutComposable(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(animationSpec = tween(500)),
-        exit = fadeOut(animationSpec = tween(500))
-    ) {
-        content()
-    }
-}
-
-@Composable
-fun FadeSlideInOutComposable(
-    visible: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(animationSpec = tween(500)) + slideInVertically(initialOffsetY = { -40 }),
-        exit = fadeOut(animationSpec = tween(500)) + slideOutVertically(targetOffsetY = { -40 })
-    ) {
-        content()
-    }
-}
-
 private suspend fun startDismissWithExitAnimation(
     animateTrigger: MutableState<Boolean>,
     onDismissRequest: () -> Unit
@@ -110,7 +80,6 @@ fun AnimatedComposable(
 
     BackHandler {
         if (!disableBackHandler) {
-            backHandler()
             coroutineScope.launch {
                 startDismissWithExitAnimation(animateTrigger, backHandler)
             }
