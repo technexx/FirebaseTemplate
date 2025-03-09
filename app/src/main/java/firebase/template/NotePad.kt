@@ -71,6 +71,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+//TODO: Exit fade from note doesn't work.
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
@@ -79,14 +80,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
-//        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-//            NoteListScaffold()
-//            println("note list composable!")
-//        }
+        //Always recomps. Should move it to separate composable that is never manipulated, and have single note recomp over that.
         NoteListScaffold()
 
-
-        //TODO: N
         if (currentScreen.value == viewModel.NOTE_SCREEN) {
             AnimatedComposable(
                 backHandler =  {
@@ -269,6 +265,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
+                    viewModel.titleTxtField = viewModel.savedNoteTitle(viewModel.selectedNoteIndex)
+                    viewModel.bodyTxtField = viewModel.savedNoteBody(viewModel.selectedNoteIndex)
                     AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
                 }
             }
@@ -321,7 +319,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             viewModel.selectedNoteIndex = index
                             viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_SINGLE_NOTE
                             viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
-                            println("updating screen as ${viewModel.getCurrentScreen}")
                         }
                     },
                     onLongPress = {
