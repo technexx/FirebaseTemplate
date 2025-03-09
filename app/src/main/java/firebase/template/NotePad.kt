@@ -79,48 +79,27 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
-        println("homeboard recomp")
+//        if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
+//            NoteListScaffold()
+//            println("note list composable!")
+//        }
+        NoteListScaffold()
 
-        AnimatedComposable(
-            backHandler =  {
-                if (currentScreen.value == viewModel.NOTE_SCREEN) {
-                    viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+
+        //TODO: N
+        if (currentScreen.value == viewModel.NOTE_SCREEN) {
+            AnimatedComposable(
+                backHandler =  {
+                    if (currentScreen.value == viewModel.NOTE_SCREEN) {
+                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                        coroutineScope.launch {
+                            roomInteraction.saveAddedOrEditedNoteToLocalListAndDatabase()
+                        }
+                    }
                 }
-            }
-        ) {
-            //Content
-            //TODO: Note list animation exits out as it does when initially going from note list to single note.
-            if (currentScreen.value == viewModel.NOTE_LIST_SCREEN) {
-                NoteListScaffold()
-                println("note list composable!")
-            }
-            //TODO: Does not animate.
-            if (currentScreen.value == viewModel.NOTE_SCREEN) {
+            ) {
+                //Content
                 SingleNoteScaffold()
-                println("single note composable!")
-            }
-
-            //Other actions
-            LaunchedEffect(Unit) {
-                coroutineScope.launch {
-                    var newLocalList = emptyList<NoteContents>().toMutableList()
-                    val titleTxtField = viewModel.titleTxtField
-                    val bodyTxtField = viewModel.bodyTxtField
-
-                    if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
-                        newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
-                        roomInteraction.addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
-                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    }
-                    if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
-                        newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
-                        roomInteraction.editNoteInDatabase(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
-                        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
-                    }
-
-                    val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
-                    viewModel.updateLocalNoteList(sortedLocalList)
-                }
             }
         }
     }
@@ -207,11 +186,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         AddButton(modifier = Modifier
                             .size(50.dp))
                     }
-                    if (currentScreen.value == viewModel.NOTE_SCREEN) {
-                        if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_NOTE) {
-                            AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
-                        }
-                    }
                 }
 
             }
@@ -255,6 +229,9 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             ) {
                             }
                         }
+                        RegTextButton("Save", 14, Color.Black) {
+
+                        }
                     },
                     actions = {
                         if (editMode.value && viewModel.getLocalNoteList.isNotEmpty()) {
@@ -282,8 +259,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 )
             },
         ) { innerPadding ->
-
-
             Column(
                 modifier = Modifier
                     .padding(innerPadding),
@@ -296,7 +271,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 {
                     AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
                 }
-
             }
         }
     }
@@ -335,18 +309,19 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        //If in edit mode and note clicked, toggle selection.
-                        if (viewModel.getNoteEditMode) {
+                        //If in editing  and note clicked, toggle selection.
+                        if (viewModel.getEditingNoteList) {
                             if (viewModel.getLocalNoteList[index].isSelected) {
                                 viewModel.markNoteAsSelectedOrUnselected(false, index)
                             } else {
                                 viewModel.markNoteAsSelectedOrUnselected(true, index)
                             }
                         } else {
-                            //If not in edit mode, retrieve selected note.
+                            //If not editing , retrieve selected note.
                             viewModel.selectedNoteIndex = index
-                            viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_NOTE
+                            viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_SINGLE_NOTE
                             viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
+                            println("updating screen as ${viewModel.getCurrentScreen}")
                         }
                     },
                     onLongPress = {
@@ -388,7 +363,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             OutlinedButton(
                 onClick = {
                     viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
-                    viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_NOTE
+                    viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_SINGLE_NOTE
                 },
                 modifier = modifier,
                 shape = CircleShape,

@@ -97,4 +97,26 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         }
         viewModel.updateLocalNoteList(localList)
     }
+
+    suspend fun saveAddedOrEditedNoteToLocalListAndDatabase() {
+        var newLocalList = emptyList<NoteContents>().toMutableList()
+        val titleTxtField = viewModel.titleTxtField
+        val bodyTxtField = viewModel.bodyTxtField
+
+        //TODO: We are updating to access note list in both conditions when single note launches.
+        if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
+            newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
+            addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
+        }
+        if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_SINGLE_NOTE) {
+            newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+            editNoteInDatabase(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
+        }
+
+        val sortedLocalList = viewModel.getLocalNoteListSortedByMostRecent(newLocalList)
+        viewModel.updateLocalNoteList(sortedLocalList)
+        viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+    }
+
+
 }

@@ -29,7 +29,7 @@ class ViewModel : ViewModel() {
     //Applies to single note screen. NOTE_SCREEN_MODE designates whether we are adding or editing a note. Not updated as state flow.
     var NOTE_SCREEN_MODE = 0
     val ADDING_NOTE = 0
-    val EDITING_NOTE = 1
+    val EDITING_SINGLE_NOTE = 1
 
     var titleTxtField = ""
     var bodyTxtField = ""
@@ -44,8 +44,8 @@ class ViewModel : ViewModel() {
     private val _localNoteList = MutableStateFlow(emptyList<NoteContents>())
     val localNoteList: StateFlow<List<NoteContents>> = _localNoteList.asStateFlow()
 
-    private val _noteEditMode = MutableStateFlow(false)
-    val noteEditMode: StateFlow<Boolean> = _noteEditMode.asStateFlow()
+    private val _editingNoteList = MutableStateFlow(false)
+    val noteEditMode: StateFlow<Boolean> = _editingNoteList.asStateFlow()
 
     fun updateCurrentScreen(value: Int) {
         _currentScreen.value = value
@@ -60,7 +60,7 @@ class ViewModel : ViewModel() {
     }
 
     fun updateNoteEditMode(isActive: Boolean) {
-        _noteEditMode.value = isActive
+        _editingNoteList.value = isActive
     }
 
     fun savedNoteTitle(noteIndex: Int): String {
@@ -151,6 +151,6 @@ class ViewModel : ViewModel() {
     val getColorTheme get() = colorTheme.value
     val getCurrentScreen get() = currentScreen.value
     val getLocalNoteList get() = localNoteList.value
-    val getNoteEditMode get() = noteEditMode.value
+    val getEditingNoteList get() = noteEditMode.value
 
 }
