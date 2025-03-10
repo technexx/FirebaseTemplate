@@ -47,17 +47,17 @@ fun RegTextButton(
     fontSize: Int,
     color: Color,
     fontWeight: FontWeight = FontWeight.Normal,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit) {
     TextButton(
         onClick = { onClick() }
     ) {
         Text(
+            modifier = modifier,
             text = text.toString(),
             fontSize = fontSize.sp,
             color = color,
             fontWeight = fontWeight,
-            modifier = Modifier
-                .padding(8.dp, 10.dp),
         )
     }
 }
@@ -75,7 +75,8 @@ fun ButtonUi(
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
         colors = ButtonDefaults.buttonColors(colorResource(color)),
     ) {
-        RegText(text = text, fontSize = fontSize, color = Color.Black, fontWeight = FontWeight.Bold)
+        RegText(
+            text = text, fontSize = fontSize, color = Color.Black, fontWeight = FontWeight.Bold)
     }
 }
 
