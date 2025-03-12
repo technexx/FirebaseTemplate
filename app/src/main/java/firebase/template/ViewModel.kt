@@ -31,9 +31,14 @@ class ViewModel : ViewModel() {
     val ADDING_NOTE = 0
     val EDITING_SINGLE_NOTE = 1
 
+    //Used by RoomInteractions to save to database.
     var titleTxtField = ""
     var bodyTxtField = ""
     var selectedNoteIndex: Int = 0
+
+    //Used to retain note title/text fields when note is first open, to determine if note has been edited.
+    var uneditedTitleTxtField = ""
+    var uneditedBodyTxtField = ""
 
     private val _colorTheme = MutableStateFlow(0)
     val colorTheme: StateFlow<Int> = _colorTheme.asStateFlow()
@@ -46,6 +51,12 @@ class ViewModel : ViewModel() {
 
     private val _editingNoteList = MutableStateFlow(false)
     val noteEditMode: StateFlow<Boolean> = _editingNoteList.asStateFlow()
+
+    private val _noteHasBeenEdited = MutableStateFlow(false)
+    val noteHasBeenEdited: StateFlow<Boolean> = _noteHasBeenEdited.asStateFlow()
+
+    private val _undoTextChanges = MutableStateFlow(false)
+    val undoTextChanges: StateFlow<Boolean> = _undoTextChanges.asStateFlow()
 
     fun updateCurrentScreen(value: Int) {
         _currentScreen.value = value
@@ -61,6 +72,14 @@ class ViewModel : ViewModel() {
 
     fun updateNoteEditMode(isActive: Boolean) {
         _editingNoteList.value = isActive
+    }
+
+    fun updateNoteHasBeenEdited(edited: Boolean) {
+        _noteHasBeenEdited.value = edited
+    }
+
+    fun updateUndoTextChanges(undo: Boolean) {
+        _undoTextChanges.value = undo
     }
 
     fun savedNoteTitle(noteIndex: Int): String {
@@ -152,5 +171,6 @@ class ViewModel : ViewModel() {
     val getCurrentScreen get() = currentScreen.value
     val getLocalNoteList get() = localNoteList.value
     val getEditingNoteList get() = noteEditMode.value
-
+    val getNoteHasBeenEdited get() = noteHasBeenEdited.value
+    val getUndoTextChanges get() = undoTextChanges.value
 }

@@ -176,9 +176,13 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SingleNoteScaffold() {
-        val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
-        val coroutineScope = rememberCoroutineScope()
+        //Globally accessed title and body set to selected note.
+        viewModel.titleTxtField = viewModel.savedNoteTitle(viewModel.selectedNoteIndex)
+        viewModel.bodyTxtField = viewModel.savedNoteBody(viewModel.selectedNoteIndex)
+        //Globally accessed unedited title and body set to selected note.
+        viewModel.uneditedTitleTxtField = viewModel.titleTxtField
+        viewModel.uneditedBodyTxtField = viewModel.bodyTxtField
 
         Scaffold(
             modifier = Modifier
@@ -243,10 +247,78 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
-                    viewModel.titleTxtField = viewModel.savedNoteTitle(viewModel.selectedNoteIndex)
-                    viewModel.bodyTxtField = viewModel.savedNoteBody(viewModel.selectedNoteIndex)
-                    AddNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
+                    SingleNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun SingleNoteScreen(title: String = "Untitled", body: String = "") {
+        var titleTxtField by remember { mutableStateOf(title) }
+        var bodyTxtField by remember { mutableStateOf(body) }
+        val focusRequester = remember { FocusRequester() }
+        val focusManager = LocalFocusManager.current
+        val coroutineScope = rememberCoroutineScope()
+
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = Theme.themeColorsList[0].notePadBackground))) {
+
+            TextField(modifier = Modifier,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                value = titleTxtField,
+                placeholder = {
+                    Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Title")) },
+                onValueChange = {
+                    titleTxtField = it
+                    viewModel.titleTxtField = it
+                },
+                singleLine = true,
+                textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 22.sp, fontWeight = FontWeight.Bold),
+                colors = TextFieldDefaults.colors(
+                    cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
+                    focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                    unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                    unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                )
+            )
+
+            HorizontalDivider(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].primaryColor), thickness = 2.dp)
+
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .clickable {
+                    focusManager.clearFocus() // Clear focus first
+                    focusRequester.requestFocus()
+                },
+                contentAlignment = Alignment.TopStart,
+            ) {
+                TextField(modifier = Modifier
+                    .focusRequester(focusRequester),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    value = bodyTxtField,
+                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(bodyTxtField, "Note")) },
+                    onValueChange = {
+                        bodyTxtField = it
+                        viewModel.bodyTxtField = it
+                    },
+                    singleLine = true,
+                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 16.sp),
+
+                    colors = TextFieldDefaults.colors(
+                        cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
+                        focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
+                    )
+                )
             }
         }
     }
@@ -352,76 +424,5 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             }
         }
     }
-
-    @Composable
-    fun AddNoteScreen(title: String = "Untitled", body: String = "") {
-        var titleTxtField by remember { mutableStateOf(title) }
-        var bodyTxtField by remember { mutableStateOf(body) }
-        val focusRequester = remember { FocusRequester() }
-        val focusManager = LocalFocusManager.current
-        val coroutineScope = rememberCoroutineScope()
-
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = Theme.themeColorsList[0].notePadBackground))) {
-
-            TextField(modifier = Modifier,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                value = titleTxtField,
-                placeholder = {
-                    Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Title")) },
-                onValueChange = {
-                    titleTxtField = it
-                    viewModel.titleTxtField = it
-                },
-                singleLine = true,
-                textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 22.sp, fontWeight = FontWeight.Bold),
-                colors = TextFieldDefaults.colors(
-                    cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
-                    focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
-                    unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
-                    unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
-                )
-            )
-
-            HorizontalDivider(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].primaryColor), thickness = 2.dp)
-
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .clickable {
-                    focusManager.clearFocus() // Clear focus first
-                    focusRequester.requestFocus()
-                },
-                contentAlignment = Alignment.TopStart,
-            ) {
-                TextField(modifier = Modifier
-                    .focusRequester(focusRequester),
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    value = bodyTxtField,
-                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(bodyTxtField, "Note")) },
-                    onValueChange = {
-                        bodyTxtField = it
-                        viewModel.bodyTxtField = it
-                    },
-                    singleLine = true,
-                    textStyle = TextStyle(color = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].noteText), fontSize = 16.sp),
-
-                    colors = TextFieldDefaults.colors(
-                        cursorColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldCursorColor),
-                        focusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
-                        unfocusedContainerColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldColor),
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
-                        unfocusedPlaceholderColor = colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].textFieldPlaceHolderTextColor),
-                    )
-                )
-            }
-        }
-    }
-
 }
 
