@@ -21,9 +21,11 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -63,15 +65,16 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @Composable
     fun HomeBoard() {
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
+        val dropDownIsVisible = viewModel.showSettingsDropDown.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
-        var animateComposable by remember { mutableStateOf(true) }
-        var noteTitleText = viewModel.noteTitleText.collectAsStateWithLifecycle()
-        var noteBodyText = viewModel.noteBodyText.collectAsStateWithLifecycle()
+
+        if (dropDownIsVisible.value) {
+            DropDownMenu()
+        }
 
         //Always recomps. Should move it to separate composable that is never manipulated, and have single note recomp over that.
         NoteListScaffold()
 
-        //Recomps on change in current screen state flow.
         if (currentScreen.value == viewModel.NOTE_SCREEN_ANIMATED) {
             AnimatedComposable(
                 backHandler =  {
@@ -95,11 +98,42 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         }
     }
 
+    @Composable
+    fun DropDownMenu() {
+        val dropDownIsVisible = viewModel.showSettingsDropDown.collectAsStateWithLifecycle()
+
+        AnimatedComposable(backHandler = {
+        }) {
+            Box(
+                modifier = Modifier
+                    .wrapContentSize(Alignment.TopEnd)
+            ) {
+                Row {
+                    DropdownMenu(modifier = Modifier
+                        .background(colorResource(Theme.themeColorsList[viewModel.getColorTheme].menuBackground)),
+                        expanded = dropDownIsVisible.value,
+                        onDismissRequest = { viewModel.updateShowSettingsDropDown(false) }
+                    ) {
+                        DropDownItemUi(
+                            text = "Settings",
+                            fontSize = 18,
+                            color = colorResource(Theme.themeColorsList[viewModel.getColorTheme].primaryColor)
+                        ) {
+                            viewModel.updateShowSettingsDropDown(true)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun NoteListScaffold() {
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
+        val showSettings = viewModel.showSettingsDropDown.collectAsStateWithLifecycle()
 
         Scaffold(
             modifier = Modifier
@@ -129,6 +163,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                 description = "menu",
                                 tint = Theme.themeColorsList[viewModel.getColorTheme].iconBackground
                             ) {
+                                viewModel.updateShowSettingsDropDown(true)
                             }
                         }
                     },

@@ -47,6 +47,9 @@ class ViewModel : ViewModel() {
     private val _currentScreen = MutableStateFlow(NOTE_LIST_SCREEN)
     val currentScreen: StateFlow<Int> = _currentScreen.asStateFlow()
 
+    private val _showSettingsDropDown = MutableStateFlow(false)
+    val showSettingsDropDown: StateFlow<Boolean> = _showSettingsDropDown.asStateFlow()
+
     private val _localNoteList = MutableStateFlow(emptyList<NoteContents>())
     val localNoteList: StateFlow<List<NoteContents>> = _localNoteList.asStateFlow()
 
@@ -74,6 +77,10 @@ class ViewModel : ViewModel() {
 
     fun updateColorTheme(theme: Int) {
         _colorTheme.value = theme
+    }
+
+    fun updateShowSettingsDropDown(show: Boolean) {
+        _showSettingsDropDown.value = show
     }
 
     fun updateLocalNoteList(note: List<NoteContents>) {
@@ -195,6 +202,7 @@ class ViewModel : ViewModel() {
 
     val getColorTheme get() = colorTheme.value
     val getCurrentScreen get() = currentScreen.value
+    val getDropDownIsVisible get() = showSettingsDropDown.value
     val getLocalNoteList get() = localNoteList.value
     val getEditingNoteList get() = noteEditMode.value
     val getNoteHasBeenEdited get() = noteHasBeenEdited.value
