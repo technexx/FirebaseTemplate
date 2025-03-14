@@ -77,6 +77,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 backHandler =  {
                     if (currentScreen.value == viewModel.NOTE_SCREEN_ANIMATED || currentScreen.value == viewModel.NOTE_SCREEN_REFRESHED) {
                         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                        println("note list")
                         coroutineScope.launch {
                             roomInteraction.saveAddedOrEditedNoteToLocalListAndDatabase()
                         }
@@ -92,6 +93,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
         if (currentScreen.value == viewModel.NOTE_SCREEN_REFRESHED) {
             SingleNoteScaffold()
+            println("title refresh is ${noteTitleText.value}")
         }
     }
 
@@ -231,10 +233,13 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             .padding(horizontal = 32.dp)) {
                             RegTextButton("Undo", 18, colorResource(Theme.themeColorsList[viewModel.getColorTheme].iconBackground)) {
                                 viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN_REFRESHED)
+                                val revertedTitle = undoChanges(viewModel.uneditedTitleTxtField, viewModel.titleTxtField)
                                 val revertedBody = undoChanges(viewModel.uneditedBodyTxtField, viewModel.bodyTxtField)
+                                viewModel.titleTxtField = revertedTitle
                                 viewModel.bodyTxtField = revertedBody
+                                println("reverted title is $revertedTitle")
+                                viewModel.updateNoteTitleText(revertedTitle)
                                 viewModel.updateNoteBodyText(revertedBody)
-                                println("body is $revertedBody")
                             }
                             RegTextButton("Save", 18, colorResource(Theme.themeColorsList[viewModel.getColorTheme].iconBackground)) {
                             }
@@ -267,10 +272,15 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
     @Composable
     fun SingleNoteScreen() {
+//        var titleTxtField by remember { mutableStateOf(title) }
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
-        val noteTitleText = viewModel.noteTitleText.collectAsStateWithLifecycle()
-        val noteBodyText = viewModel.noteBodyText.collectAsStateWithLifecycle()
+        var noteTitleText = viewModel.noteTitleText.collectAsStateWithLifecycle()
+        var noteBodyText = viewModel.noteBodyText.collectAsStateWithLifecycle()
+
+        //TODO: Here. Related to remember state flow, since it recalls last value. "title" is just a placeholder for empty value.
+//        println("title passed in is $title")
+//        println("title in field is $titleTxtField")
 
         Column(modifier = Modifier
             .fillMaxSize()

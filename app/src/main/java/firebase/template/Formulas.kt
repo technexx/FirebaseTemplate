@@ -29,45 +29,27 @@ fun formattedDate(): String {
 }
 
 fun undoChanges(originalString: String, modifiedString: String): String {
-    val originalWords = originalString.split(" ")
-    val modifiedWords = modifiedString.split(" ")
+    if (originalString.length == modifiedString.length) {
+        return originalString // No changes to undo
+    }
 
-    if (modifiedWords.size > originalWords.size) {
-        // Remove the last added word
-        return modifiedWords.subList(0, modifiedWords.size - 1).joinToString(" ")
-    } else if (modifiedWords.size < originalWords.size) {
-        // Add a letter that was removed.
+    if (originalString.length > modifiedString.length) {
+        // Add a character back to the modified string
         if (modifiedString.length < originalString.length) {
             return modifiedString + originalString[modifiedString.length]
         } else {
             return modifiedString
         }
+
     } else {
-        // Check for letter additions/subtractions within existing words
-        val minWords = minOf(originalWords.size, modifiedWords.size)
-        val resultWords = mutableListOf<String>()
-
-        for (i in 0 until minWords) {
-            if (originalWords[i].length < modifiedWords[i].length) {
-                // Remove extra letters from the current word
-                resultWords.add(modifiedWords[i].substring(0, originalWords[i].length))
-            } else if (originalWords[i].length > modifiedWords[i].length) {
-                //Add a letter back to the current word
-                if (modifiedWords[i].length < originalWords[i].length){
-                    resultWords.add(modifiedWords[i] + originalWords[i][modifiedWords[i].length])
-                } else {
-                    resultWords.add(modifiedWords[i])
-                }
-            } else {
-                resultWords.add(modifiedWords[i])
-            }
+        // Handle the case where modifiedString is longer than originalString
+        // Remove the last word added
+        val wordsModified = modifiedString.split(" ")
+        val wordsOriginal = originalString.split(" ")
+        if (wordsModified.size > wordsOriginal.size) {
+            return wordsModified.subList(0, wordsModified.size - 1).joinToString(" ")
+        } else {
+            return modifiedString
         }
-
-        // Add remaining original words if any
-        if(originalWords.size > modifiedWords.size){
-            resultWords.addAll(originalWords.subList(minWords, originalWords.size))
-        }
-
-        return resultWords.joinToString(" ")
     }
 }
