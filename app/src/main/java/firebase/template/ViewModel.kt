@@ -24,7 +24,8 @@ import java.util.Locale
 class ViewModel : ViewModel() {
     //Either list of notes, or single note. Updated as currentScreen stateflow.
     val NOTE_LIST_SCREEN = 0
-    val NOTE_SCREEN = 1
+    val NOTE_SCREEN_ANIMATED = 1
+    val NOTE_SCREEN_REFRESHED = 2
 
     //Applies to single note screen. NOTE_SCREEN_MODE designates whether we are adding or editing a note. Not updated as state flow.
     var NOTE_SCREEN_MODE = 0
@@ -55,8 +56,17 @@ class ViewModel : ViewModel() {
     private val _noteHasBeenEdited = MutableStateFlow(false)
     val noteHasBeenEdited: StateFlow<Boolean> = _noteHasBeenEdited.asStateFlow()
 
-    private val _undoTextChanges = MutableStateFlow(false)
-    val undoTextChanges: StateFlow<Boolean> = _undoTextChanges.asStateFlow()
+    private val _singleNoteScreenAsAnimation = MutableStateFlow(false)
+    val singleNoteScreenAsAnimation: StateFlow<Boolean> = _singleNoteScreenAsAnimation.asStateFlow()
+
+    private val _doesCurrentTitleAndBodyTextMatchUneditedText = MutableStateFlow(false)
+    val doesCurrentTitleAndBodyTextMatchUneditedText: StateFlow<Boolean> = _doesCurrentTitleAndBodyTextMatchUneditedText.asStateFlow()
+
+    private val _noteTitleText = MutableStateFlow("")
+    val noteTitleText: StateFlow<String> = _noteTitleText.asStateFlow()
+
+    private val _noteBodyText = MutableStateFlow("")
+    val noteBodyText: StateFlow<String> = _noteBodyText.asStateFlow()
 
     fun updateCurrentScreen(value: Int) {
         _currentScreen.value = value
@@ -78,8 +88,20 @@ class ViewModel : ViewModel() {
         _noteHasBeenEdited.value = edited
     }
 
-    fun updateUndoTextChanges(undo: Boolean) {
-        _undoTextChanges.value = undo
+    fun updateSingleNoteAsAnimation(asAnimation: Boolean) {
+        _singleNoteScreenAsAnimation.value = asAnimation
+    }
+
+    fun updateDoesCurrentTitleAndBodyTextMatchUneditedText() {
+        _doesCurrentTitleAndBodyTextMatchUneditedText.value = (titleTxtField == uneditedTitleTxtField && bodyTxtField == uneditedBodyTxtField)
+    }
+
+    fun updateNoteTitleText(text: String) {
+        _noteTitleText.value = text
+    }
+
+    fun updateNoteBodyText(text: String) {
+        _noteBodyText.value = text
     }
 
     fun savedNoteTitle(noteIndex: Int): String {
@@ -167,10 +189,13 @@ class ViewModel : ViewModel() {
         }
     }
 
+    fun areStringsEqual(firstString: String, secondString: String): Boolean {
+        return firstString == secondString
+    }
+
     val getColorTheme get() = colorTheme.value
     val getCurrentScreen get() = currentScreen.value
     val getLocalNoteList get() = localNoteList.value
     val getEditingNoteList get() = noteEditMode.value
     val getNoteHasBeenEdited get() = noteHasBeenEdited.value
-    val getUndoTextChanges get() = undoTextChanges.value
 }

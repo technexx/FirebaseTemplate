@@ -103,8 +103,6 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         val titleTxtField = viewModel.titleTxtField
         val bodyTxtField = viewModel.bodyTxtField
 
-        println("title and body are $titleTxtField and $bodyTxtField")
-
         if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
             newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
             addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)

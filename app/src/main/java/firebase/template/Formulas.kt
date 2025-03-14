@@ -27,3 +27,29 @@ fun formattedDate(): String {
         SimpleDateFormat(dateStringFormat, Locale.getDefault()).format(Date())
     }
 }
+
+fun undoChanges(originalString: String, modifiedString: String): String {
+    if (originalString.length == modifiedString.length) {
+        return originalString // No changes to undo
+    }
+
+    if (originalString.length > modifiedString.length) {
+        // Add a character back to the modified string
+        if (modifiedString.length < originalString.length) {
+            return modifiedString + originalString[modifiedString.length]
+        } else {
+            return modifiedString
+        }
+
+    } else {
+        // Handle the case where modifiedString is longer than originalString
+        // Remove the last word added
+        val wordsModified = modifiedString.split(" ")
+        val wordsOriginal = originalString.split(" ")
+        if (wordsModified.size > wordsOriginal.size) {
+            return wordsModified.subList(0, wordsModified.size - 1).joinToString(" ")
+        } else {
+            return modifiedString
+        }
+    }
+}

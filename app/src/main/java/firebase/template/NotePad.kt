@@ -64,15 +64,20 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     fun HomeBoard() {
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
+        var animateComposable by remember { mutableStateOf(true) }
+        var noteTitleText = viewModel.noteTitleText.collectAsStateWithLifecycle()
+        var noteBodyText = viewModel.noteBodyText.collectAsStateWithLifecycle()
 
         //Always recomps. Should move it to separate composable that is never manipulated, and have single note recomp over that.
         NoteListScaffold()
 
-        if (currentScreen.value == viewModel.NOTE_SCREEN) {
+        //Recomps on change in current screen state flow.
+        if (currentScreen.value == viewModel.NOTE_SCREEN_ANIMATED) {
             AnimatedComposable(
                 backHandler =  {
-                    if (currentScreen.value == viewModel.NOTE_SCREEN) {
+                    if (currentScreen.value == viewModel.NOTE_SCREEN_ANIMATED || currentScreen.value == viewModel.NOTE_SCREEN_REFRESHED) {
                         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
+                        println("note list")
                         coroutineScope.launch {
                             roomInteraction.saveAddedOrEditedNoteToLocalListAndDatabase()
                         }
@@ -81,14 +86,20 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             ) {
                 //Content
                 SingleNoteScaffold()
+                viewModel.updateNoteTitleText(viewModel.savedNoteTitle(viewModel.selectedNoteIndex))
+                viewModel.updateNoteBodyText(viewModel.savedNoteBody(viewModel.selectedNoteIndex))
             }
+        }
+
+        if (currentScreen.value == viewModel.NOTE_SCREEN_REFRESHED) {
+            SingleNoteScaffold()
+            println("title refresh is ${noteTitleText.value}")
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun NoteListScaffold() {
-        val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
@@ -177,6 +188,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @Composable
     fun SingleNoteScaffold() {
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
+        val doesCurrentTitleAndBodyTextMatchUneditedText = viewModel.doesCurrentTitleAndBodyTextMatchUneditedText.collectAsStateWithLifecycle()
         //Globally accessed title and body set to selected note.
         viewModel.titleTxtField = viewModel.savedNoteTitle(viewModel.selectedNoteIndex)
         viewModel.bodyTxtField = viewModel.savedNoteBody(viewModel.selectedNoteIndex)
@@ -220,10 +232,16 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         modifier = Modifier
                             .padding(horizontal = 32.dp)) {
                             RegTextButton("Undo", 18, colorResource(Theme.themeColorsList[viewModel.getColorTheme].iconBackground)) {
-
+                                viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN_REFRESHED)
+                                val revertedTitle = undoChanges(viewModel.uneditedTitleTxtField, viewModel.titleTxtField)
+                                val revertedBody = undoChanges(viewModel.uneditedBodyTxtField, viewModel.bodyTxtField)
+                                viewModel.titleTxtField = revertedTitle
+                                viewModel.bodyTxtField = revertedBody
+                                println("reverted title is $revertedTitle")
+                                viewModel.updateNoteTitleText(revertedTitle)
+                                viewModel.updateNoteBodyText(revertedBody)
                             }
                             RegTextButton("Save", 18, colorResource(Theme.themeColorsList[viewModel.getColorTheme].iconBackground)) {
-
                             }
                         }
                         //For drop down menu.
@@ -231,7 +249,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             modifier = Modifier
                                 .wrapContentSize(Alignment.TopEnd)
                         ) {
-
                         }
                     },
                 )
@@ -247,19 +264,23 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     .background(colorResource(id = Theme.themeColorsList[viewModel.getColorTheme].notePadBackground))
                 )
                 {
-                    SingleNoteScreen(viewModel.savedNoteTitle(viewModel.selectedNoteIndex), viewModel.savedNoteBody(viewModel.selectedNoteIndex))
+                    SingleNoteScreen()
                 }
             }
         }
     }
 
     @Composable
-    fun SingleNoteScreen(title: String = "Untitled", body: String = "") {
-        var titleTxtField by remember { mutableStateOf(title) }
-        var bodyTxtField by remember { mutableStateOf(body) }
+    fun SingleNoteScreen() {
+//        var titleTxtField by remember { mutableStateOf(title) }
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
-        val coroutineScope = rememberCoroutineScope()
+        var noteTitleText = viewModel.noteTitleText.collectAsStateWithLifecycle()
+        var noteBodyText = viewModel.noteBodyText.collectAsStateWithLifecycle()
+
+        //TODO: Here. Related to remember state flow, since it recalls last value. "title" is just a placeholder for empty value.
+//        println("title passed in is $title")
+//        println("title in field is $titleTxtField")
 
         Column(modifier = Modifier
             .fillMaxSize()
@@ -267,11 +288,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
 
             TextField(modifier = Modifier,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                value = titleTxtField,
+                value = noteTitleText.value,
                 placeholder = {
-                    Text(showPlaceHolderTextIfFieldIsEmpty(titleTxtField, "Title")) },
+                    Text(showPlaceHolderTextIfFieldIsEmpty(noteTitleText.value, "Title")) },
                 onValueChange = {
-                    titleTxtField = it
+                    viewModel.updateNoteTitleText(it)
                     viewModel.titleTxtField = it
                 },
                 singleLine = true,
@@ -300,10 +321,10 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 TextField(modifier = Modifier
                     .focusRequester(focusRequester),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    value = bodyTxtField,
-                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(bodyTxtField, "Note")) },
+                    value = noteBodyText.value,
+                    placeholder = { Text(showPlaceHolderTextIfFieldIsEmpty(noteBodyText.value, "Note")) },
                     onValueChange = {
-                        bodyTxtField = it
+                        viewModel.updateNoteBodyText(it)
                         viewModel.bodyTxtField = it
                     },
                     singleLine = true,
@@ -368,7 +389,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                             //If not editing , retrieve selected note.
                             viewModel.selectedNoteIndex = index
                             viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_SINGLE_NOTE
-                            viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
+                            viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN_ANIMATED)
                         }
                     },
                     onLongPress = {
@@ -409,7 +430,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
         Box() {
             OutlinedButton(
                 onClick = {
-                    viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN)
+                    viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN_ANIMATED)
                     viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_SINGLE_NOTE
                 },
                 modifier = modifier,
