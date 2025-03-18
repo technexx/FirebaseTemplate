@@ -62,6 +62,8 @@ import kotlinx.coroutines.launch
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
 class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
+    val menus = Menus()
+
     @Composable
     fun HomeBoard() {
         val currentScreen = viewModel.currentScreen.collectAsStateWithLifecycle()
@@ -125,7 +127,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                 }
             }
         }
-
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -446,7 +447,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     RegText(text = viewModel.getLocalNoteList[index].lastEdited, fontSize = 15, color = colorResource(textColor))
                 }
             }
-
         }
     }
 
