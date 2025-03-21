@@ -448,6 +448,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             OutlinedButton(
                 onClick = {
                     viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN_ANIMATED)
+                    viewModel.updateNoteTitleText("")
+                    viewModel.updateNoteBodyText("")
                     viewModel.NOTE_SCREEN_MODE = viewModel.ADDING_NOTE
                 },
                 modifier = modifier,

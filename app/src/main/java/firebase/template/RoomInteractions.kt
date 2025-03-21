@@ -114,8 +114,9 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
 
     suspend fun saveAddedOrEditedNoteToLocalListAndDatabase() {
         var newLocalList = emptyList<NoteContents>().toMutableList()
-        val titleTxtField = viewModel.titleTxtField
-        val bodyTxtField = viewModel.bodyTxtField
+        var titleTxtField = viewModel.getNoteTitleText
+        if (titleTxtField.isEmpty()) titleTxtField = "Untitled"
+        val bodyTxtField = viewModel.getNoteBodyText
 
         if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
             newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)

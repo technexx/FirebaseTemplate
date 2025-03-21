@@ -207,6 +207,8 @@ class ViewModel : ViewModel() {
         }
     }
 
+    val getNoteTitleText get() = noteTitleText.value
+    val getNoteBodyText get() = noteBodyText.value
     val getColorTheme get() = colorTheme.value
     val getCurrentScreen get() = currentScreen.value
     val getDropDownIsVisible get() = showSettingsDropDown.value
