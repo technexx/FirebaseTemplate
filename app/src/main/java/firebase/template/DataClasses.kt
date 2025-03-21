@@ -4,8 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 data class NoteContents(
     //Will iterate up regardless of insertions/deletions
-    var uid: Int,
-    //Used to
+    var id: Int,
     var title: String,
     var body: String,
     var lastEdited: String,

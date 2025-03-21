@@ -36,7 +36,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
     suspend fun addNoteToDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
         val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
         //Passing local NoteContents object inputs into database NoteData object.
-        val databaseNote = NoteData(null, newNote.title, newNote.body, newNote.lastEdited)
+        val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
         insertNoteIntoDatabase(databaseNote)
     }
 
@@ -51,20 +51,14 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         noteList[index].title = title
         noteList[index].body = body
         //Index of local list will not be the same for db list.
-        val databaseNote = NoteData(noteList[index].uid, noteList[index].title, noteList[index].body, noteList[index].lastEdited)
-
-        for (i in databaseNoteList()) {
-            println("uIds are ${i.uid}")
-        }
+        val databaseNote = NoteData(null, noteList[index].id, noteList[index].title, noteList[index].body, noteList[index].lastEdited)
 
         println("uId of note to update is ${databaseNote.uid}")
         println("title of index 0 in local note list is ${noteList[index].title}")
         println("title in NoteData object is ${databaseNote.title}")
+
         updateNoteInDatabase(databaseNote)
-
         delay(2000)
-
-        println("title of index 0 in database post update is ${databaseNoteList()[0].title}")
     }
 
     suspend fun updateNoteInDatabase(note: NoteData) {
@@ -79,7 +73,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
             val idList = listOfIdsOfSelectedNotes()
 
             for (i in databaseNoteList) {
-                if (idList.contains(i.uid)) {
+                if (idList.contains(i.id)) {
                     notesDao.deleteNotes(i)
                 }
             }
@@ -90,7 +84,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         val localNoteList = viewModel.getLocalNoteList
         val databaseNoteList = mutableListOf<NoteData>()
         for (i in localNoteList) {
-            databaseNoteList.add(NoteData(i.uid, i.title, i.body, i.lastEdited))
+            databaseNoteList.add(NoteData(null, i.id, i.title, i.body, i.lastEdited))
         }
         return databaseNoteList
     }
@@ -99,7 +93,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         val localNoteList = viewModel.getLocalNoteList
         val listOfSelectedIds = mutableListOf<Int>()
         for (i in localNoteList) {
-            if (i.isSelected) listOfSelectedIds.add(i.uid)
+            if (i.isSelected) listOfSelectedIds.add(i.id)
         }
         return listOfSelectedIds
     }
@@ -107,7 +101,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
     suspend fun populateLocalNoteListFromDatabase() {
         val localList = mutableListOf<NoteContents>()
         for (i in localNoteListFromDatabaseStorage()) {
-            localList.add(NoteContents(i.uid, i.title, i.body, i.lastEdited, false))
+            localList.add(NoteContents(i.id, i.title, i.body, i.lastEdited, false))
         }
         viewModel.updateLocalNoteList(localList)
     }
