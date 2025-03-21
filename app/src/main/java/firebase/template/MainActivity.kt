@@ -51,7 +51,6 @@ class MainActivity : ComponentActivity() {
         activity = this@MainActivity
         appContext = applicationContext
         viewModel = ViewModel()
-        firebaseQueries = FirebaseQueries()
 
         noteDatabase = Room.databaseBuilder(
             appContext,
@@ -60,12 +59,16 @@ class MainActivity : ComponentActivity() {
         ).build()
 
         roomInteractions = RoomInteractions(viewModel, noteDatabase)
+        firebaseQueries = FirebaseQueries(roomInteractions)
         val notePad = NotePad(viewModel, roomInteractions)
 
         ioScope.launch {
             roomInteractions.populateLocalNoteListFromDatabase()
+            viewModel.setGloballyAccessedTextAndUneditedTextFields()
             //Testing db uploadAppDatabase
-//            delay(2000)
+            delay(2000)
+            firebaseQueries.writeToFirebaseDatabase()
+            firebaseQueries.readFromFirebaseDatabase()
 //            firebaseQueries.uploadDatabase(appContext, "notes-database")
         }
 

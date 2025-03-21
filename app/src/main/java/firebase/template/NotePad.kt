@@ -83,6 +83,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     if (currentScreen.value == viewModel.NOTE_SCREEN_ANIMATED || currentScreen.value == viewModel.NOTE_SCREEN_REFRESHED) {
                         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
                         coroutineScope.launch {
+                            println("saving to db")
                             roomInteraction.saveAddedOrEditedNoteToLocalListAndDatabase()
                         }
                     }
@@ -90,8 +91,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             ) {
                 //Content
                 SingleNoteScaffold()
-                viewModel.updateNoteTitleText(viewModel.savedNoteTitle(viewModel.selectedNoteIndex))
-                viewModel.updateNoteBodyText(viewModel.savedNoteBody(viewModel.selectedNoteIndex))
             }
         }
 
@@ -222,13 +221,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     @Composable
     fun SingleNoteScaffold() {
         val editMode = viewModel.noteEditMode.collectAsStateWithLifecycle()
-        val doesCurrentTitleAndBodyTextMatchUneditedText = viewModel.doesCurrentTitleAndBodyTextMatchUneditedText.collectAsStateWithLifecycle()
-        //Globally accessed title and body set to selected note.
-        viewModel.titleTxtField = viewModel.savedNoteTitle(viewModel.selectedNoteIndex)
-        viewModel.bodyTxtField = viewModel.savedNoteBody(viewModel.selectedNoteIndex)
-        //Globally accessed unedited title and body set to selected note.
-        viewModel.uneditedTitleTxtField = viewModel.titleTxtField
-        viewModel.uneditedBodyTxtField = viewModel.bodyTxtField
 
         Scaffold(
             modifier = Modifier
@@ -456,7 +448,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             OutlinedButton(
                 onClick = {
                     viewModel.updateCurrentScreen(viewModel.NOTE_SCREEN_ANIMATED)
-                    viewModel.NOTE_SCREEN_MODE = viewModel.EDITING_SINGLE_NOTE
+                    viewModel.NOTE_SCREEN_MODE = viewModel.ADDING_NOTE
                 },
                 modifier = modifier,
                 shape = CircleShape,

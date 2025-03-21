@@ -19,7 +19,7 @@ interface NotesDao {
     fun insertNote(vararg notes_data:NoteData)
 
     @Update
-    fun updateNotes(cuisine:NoteData)
+    fun updateNotes(note: NoteData)
 
     @Delete
     fun deleteNotes(note: NoteData)

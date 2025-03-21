@@ -3,7 +3,9 @@ package firebase.template
 import androidx.compose.ui.graphics.Color
 
 data class NoteContents(
-    var id: Int,
+    //Will iterate up regardless of insertions/deletions
+    var uid: Int,
+    //Used to
     var title: String,
     var body: String,
     var lastEdited: String,

@@ -111,6 +111,17 @@ class ViewModel : ViewModel() {
         _noteBodyText.value = text
     }
 
+    fun setGloballyAccessedTextAndUneditedTextFields() {
+        if (getLocalNoteList.isNotEmpty()) {
+            //Globally accessed title and body set to selected note.
+            titleTxtField = savedNoteTitle(selectedNoteIndex)
+            bodyTxtField = savedNoteBody(selectedNoteIndex)
+            //Globally accessed unedited title and body set to selected note.
+            uneditedTitleTxtField = titleTxtField
+            uneditedBodyTxtField = bodyTxtField
+        }
+    }
+
     fun savedNoteTitle(noteIndex: Int): String {
         return getNewCopyOfLocalNoteList()[noteIndex].title
     }
@@ -148,7 +159,7 @@ class ViewModel : ViewModel() {
     fun getNewCopyOfLocalNoteList(): SnapshotStateList<NoteContents> {
         val newList = SnapshotStateList<NoteContents>()
         for (i in getLocalNoteList.indices) {
-            newList.add(NoteContents(getLocalNoteList[i].id, getLocalNoteList[i].title, getLocalNoteList[i].body, getLocalNoteList[i].lastEdited, getLocalNoteList[i].isSelected))
+            newList.add(NoteContents(getLocalNoteList[i].uid, getLocalNoteList[i].title, getLocalNoteList[i].body, getLocalNoteList[i].lastEdited, getLocalNoteList[i].isSelected))
         }
         return newList
     }
@@ -194,10 +205,6 @@ class ViewModel : ViewModel() {
             val formatter = SimpleDateFormat(pattern, Locale.getDefault())
             dataObjects.sortedBy { formatter.parse(it.lastEdited)?.time ?: 0 }
         }
-    }
-
-    fun areStringsEqual(firstString: String, secondString: String): Boolean {
-        return firstString == secondString
     }
 
     val getColorTheme get() = colorTheme.value
