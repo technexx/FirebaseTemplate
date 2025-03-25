@@ -18,7 +18,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 class FirebaseQueries(private val roomInteractions: RoomInteractions) {
-    private fun firebaseDatabaseReference(): DatabaseReference {
+    fun firebaseDatabaseReference(): DatabaseReference {
         val database = Firebase.database
         val myRef = database.getReference("message")
         return myRef
@@ -35,7 +35,7 @@ class FirebaseQueries(private val roomInteractions: RoomInteractions) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 val value = dataSnapshot.value
-                println( "Value is: $value")
+                println( "Value from firebase read is: $value")
             }
 
             override fun onCancelled(error: DatabaseError) {

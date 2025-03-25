@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 
         roomInteractions = RoomInteractions(viewModel, noteDatabase)
         firebaseQueries = FirebaseQueries(roomInteractions)
-        val notePad = NotePad(viewModel, roomInteractions)
+        val notePad = NotePad(viewModel, roomInteractions, firebaseQueries)
 
         ioScope.launch {
             roomInteractions.populateLocalNoteListFromDatabase()

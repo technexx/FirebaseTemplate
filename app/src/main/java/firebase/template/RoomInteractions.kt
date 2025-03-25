@@ -19,6 +19,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         withContext(Dispatchers.IO) {
             noteList = notesDao.getAllNotesData()
         }
+        println("note list from db on firebase write is $noteList")
         return noteList
     }
 
@@ -53,10 +54,6 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         //Index of local list will not be the same for db list.
         val databaseNote = NoteData(null, noteList[index].id, noteList[index].title, noteList[index].body, noteList[index].lastEdited)
 
-        println("uId of note to update is ${databaseNote.uid}")
-        println("title of index 0 in local note list is ${noteList[index].title}")
-        println("title in NoteData object is ${databaseNote.title}")
-
         updateNoteInDatabase(databaseNote)
         delay(2000)
     }
@@ -67,12 +64,16 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         }
     }
 
+    //TODO: Not working.
     suspend fun deleteSelectedNotesFromDatabase() {
         withContext(Dispatchers.IO) {
             val databaseNoteList = databaseNoteList()
             val idList = listOfIdsOfSelectedNotes()
 
+            println("id list is $idList")
+
             for (i in databaseNoteList) {
+                println("db ids are ${i.id}")
                 if (idList.contains(i.id)) {
                     notesDao.deleteNotes(i)
                 }

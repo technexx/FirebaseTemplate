@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
@@ -61,7 +62,7 @@ import kotlinx.coroutines.launch
 
 //TODO: Start note list at +1 (1 instead of 0) to match up with uID of database.
 
-class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions) {
+class NotePad(private val viewModel: ViewModel, private val roomInteraction: RoomInteractions, private val firebaseQueries: FirebaseQueries) {
     val menus = Menus()
 
     @Composable
@@ -83,8 +84,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                     if (currentScreen.value == viewModel.NOTE_SCREEN_ANIMATED || currentScreen.value == viewModel.NOTE_SCREEN_REFRESHED) {
                         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
                         coroutineScope.launch {
-                            println("saving to db")
                             roomInteraction.saveAddedOrEditedNoteToLocalListAndDatabase()
+                            firebaseQueries.writeToFirebaseDatabase()
                         }
                     }
                 }
@@ -208,6 +209,8 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                         .fillMaxSize(),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.Bottom) {
+                        TestButton(modifier = Modifier
+                            .size(50.dp))
                         AddButton(modifier = Modifier
                             .size(50.dp))
                     }
@@ -262,7 +265,6 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
                                 val revertedBody = undoChanges(viewModel.uneditedBodyTxtField, viewModel.bodyTxtField)
                                 viewModel.bodyTxtField = revertedBody
                                 viewModel.updateNoteBodyText(revertedBody)
-                                println("body is $revertedBody")
                             }
                             RegTextButton("Save", 18, colorResource(Theme.themeColorsList[viewModel.getColorTheme].iconBackground)) {
                             }
@@ -462,6 +464,24 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
             ) {
                 Icon(Icons.Default.Add, contentDescription = "content description")
             }
+        }
+    }
+
+    @Composable
+    fun TestButton(modifier: Modifier = Modifier) {
+        OutlinedButton(
+            onClick = {
+                println("${firebaseQueries.firebaseDatabaseReference().get()}")
+            },
+            modifier = modifier,
+            shape = CircleShape,
+            border = BorderStroke(4.dp, colorResource(R.color.grey_500)),
+            contentPadding = PaddingValues(0.dp),  //avoid the little icon
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.orange_1),
+                contentColor = Color.Black),
+        ) {
+            Icon(Icons.Default.Build, contentDescription = "content description")
         }
     }
 }

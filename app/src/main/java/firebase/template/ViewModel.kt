@@ -172,7 +172,6 @@ class ViewModel : ViewModel() {
         return false
     }
 
-    //TODO: Our local list ids do not match database ones when we save them here. We also add it incorrectly in addNoteToDatabase().
     fun getLocalNoteListWithNewNoteAdded(titleTxtField: String = "Untitled", bodyTxtField: String): MutableList<NoteContents> {
         val noteToAdd = NoteContents(getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
         val oldNoteList = getNewCopyOfLocalNoteList()
