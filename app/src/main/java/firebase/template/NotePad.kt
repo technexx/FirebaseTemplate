@@ -471,7 +471,7 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     fun TestButton(modifier: Modifier = Modifier) {
         OutlinedButton(
             onClick = {
-                println("${firebaseQueries.firebaseDatabaseReference().get()}")
+                println("${firebaseQueries.firebaseDatabaseReference().get().result}")
             },
             modifier = modifier,
             shape = CircleShape,

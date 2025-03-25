@@ -172,8 +172,8 @@ class ViewModel : ViewModel() {
         return false
     }
 
-    fun getLocalNoteListWithNewNoteAdded(titleTxtField: String = "Untitled", bodyTxtField: String): MutableList<NoteContents> {
-        val noteToAdd = NoteContents(getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
+    fun getLocalNoteListWithNewNoteAdded(id: Int, titleTxtField: String = "Untitled", bodyTxtField: String): MutableList<NoteContents> {
+        val noteToAdd = NoteContents(id, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
         val oldNoteList = getNewCopyOfLocalNoteList()
         val newNoteList = SnapshotStateList<NoteContents>()
         newNoteList.addAll(oldNoteList)

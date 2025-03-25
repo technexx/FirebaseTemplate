@@ -34,19 +34,6 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         return noteHolder
     }
 
-    suspend fun addNoteToDatabase(titleTxtField: String = "Untitled", bodyTxtField: String) {
-        val newNote = NoteContents(viewModel.getLocalNoteList.size, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
-        //Passing local NoteContents object inputs into database NoteData object.
-        val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
-        insertNoteIntoDatabase(databaseNote)
-    }
-
-    suspend fun insertNoteIntoDatabase(noteData: NoteData) {
-        withContext(Dispatchers.IO) {
-            notesDao.insertNote(noteData)
-        }
-    }
-
     suspend fun editNoteInDatabase(index: Int, title: String, body: String) {
         val noteList = viewModel.getNewCopyOfLocalNoteList()
         noteList[index].title = title
@@ -108,14 +95,15 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
     }
 
     suspend fun saveAddedOrEditedNoteToLocalListAndDatabase() {
+        val id = viewModel.getLocalNoteList.size
         var newLocalList = emptyList<NoteContents>().toMutableList()
         var titleTxtField = viewModel.getNoteTitleText
         if (titleTxtField.isEmpty()) titleTxtField = "Untitled"
         val bodyTxtField = viewModel.getNoteBodyText
 
         if (viewModel.NOTE_SCREEN_MODE == viewModel.ADDING_NOTE) {
-            newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(titleTxtField, bodyTxtField = bodyTxtField)
-            addNoteToDatabase(titleTxtField, bodyTxtField = bodyTxtField)
+            newLocalList = viewModel.getLocalNoteListWithNewNoteAdded(id, titleTxtField, bodyTxtField = bodyTxtField)
+            addNoteToDatabase(id, titleTxtField, bodyTxtField = bodyTxtField)
         }
         if (viewModel.NOTE_SCREEN_MODE == viewModel.EDITING_SINGLE_NOTE) {
             newLocalList = viewModel.getLocalNoteListWithNoteEdited(viewModel.selectedNoteIndex, titleTxtField, bodyTxtField)
@@ -127,5 +115,17 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         viewModel.updateCurrentScreen(viewModel.NOTE_LIST_SCREEN)
     }
 
+    suspend fun addNoteToDatabase(id: Int, titleTxtField: String = "Untitled", bodyTxtField: String) {
+        val newNote = NoteContents(id, titleTxtField, bodyTxtField, formattedDateAndTime(), false)
+        //Passing local NoteContents object inputs into database NoteData object.
+        val databaseNote = NoteData(null, newNote.id, newNote.title, newNote.body, newNote.lastEdited)
+        insertNoteIntoDatabase(databaseNote)
+    }
+
+    suspend fun insertNoteIntoDatabase(noteData: NoteData) {
+        withContext(Dispatchers.IO) {
+            notesDao.insertNote(noteData)
+        }
+    }
 
 }
