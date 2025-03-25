@@ -1,5 +1,6 @@
 package firebase.template
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -471,7 +472,11 @@ class NotePad(private val viewModel: ViewModel, private val roomInteraction: Roo
     fun TestButton(modifier: Modifier = Modifier) {
         OutlinedButton(
             onClick = {
-                println("${firebaseQueries.firebaseDatabaseReference().get().result}")
+                println("${firebaseQueries.firebaseDatabaseReference().get().addOnSuccessListener {
+                    println("Got value ${it.value}")
+                }.addOnFailureListener{
+                    println("Error g $it")
+                }}")
             },
             modifier = modifier,
             shape = CircleShape,

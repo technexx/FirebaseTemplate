@@ -51,7 +51,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         }
     }
 
-    //TODO: Not working.
+    //TODO: Gets IDs mixed up. May be due to local list sorting. Check selection click that adds to id lis, too.
     suspend fun deleteSelectedNotesFromDatabase() {
         withContext(Dispatchers.IO) {
             val databaseNoteList = databaseNoteList()
