@@ -145,6 +145,7 @@ class ViewModel : ViewModel() {
         val newList = getNewCopyOfLocalNoteList()
         newList[index].isSelected = selected
 
+        println("note selected is ${newList[index]}")
         updateLocalNoteList(newList)
     }
 

@@ -19,7 +19,6 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         withContext(Dispatchers.IO) {
             noteList = notesDao.getAllNotesData()
         }
-        println("note list from db on firebase write is $noteList")
         return noteList
     }
 
@@ -28,7 +27,7 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
 
         val dbContents = databaseNoteList()
         for (i in dbContents) {
-            noteHolder.add(NoteContents(i.uid!!, i.title, i.body, i.lastEdited, false))
+            noteHolder.add(NoteContents(i.id, i.title, i.body, i.lastEdited, false))
         }
 
         return noteHolder
@@ -51,23 +50,6 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         }
     }
 
-    //TODO: Gets IDs mixed up. May be due to local list sorting. Check selection click that adds to id lis, too.
-    suspend fun deleteSelectedNotesFromDatabase() {
-        withContext(Dispatchers.IO) {
-            val databaseNoteList = databaseNoteList()
-            val idList = listOfIdsOfSelectedNotes()
-
-            println("id list is $idList")
-
-            for (i in databaseNoteList) {
-                println("db ids are ${i.id}")
-                if (idList.contains(i.id)) {
-                    notesDao.deleteNotes(i)
-                }
-            }
-        }
-    }
-
     private fun getDatabaseNoteListFromLocalNoteList(): List<NoteData>{
         val localNoteList = viewModel.getLocalNoteList
         val databaseNoteList = mutableListOf<NoteData>()
@@ -75,15 +57,6 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
             databaseNoteList.add(NoteData(null, i.id, i.title, i.body, i.lastEdited))
         }
         return databaseNoteList
-    }
-
-    private fun listOfIdsOfSelectedNotes(): List<Int> {
-        val localNoteList = viewModel.getLocalNoteList
-        val listOfSelectedIds = mutableListOf<Int>()
-        for (i in localNoteList) {
-            if (i.isSelected) listOfSelectedIds.add(i.id)
-        }
-        return listOfSelectedIds
     }
 
     suspend fun populateLocalNoteListFromDatabase() {
@@ -128,4 +101,25 @@ class RoomInteractions(private val viewModel: ViewModel, notesDatabase: NotesDat
         }
     }
 
+    suspend fun deleteSelectedNotesFromDatabase() {
+        withContext(Dispatchers.IO) {
+            val databaseNoteList = databaseNoteList()
+            val idList = listOfIdsOfSelectedNotes()
+
+            for (i in databaseNoteList) {
+                if (idList.contains(i.id)) {
+                    notesDao.deleteNotes(i)
+                }
+            }
+        }
+    }
+
+    private fun listOfIdsOfSelectedNotes(): List<Int> {
+        val localNoteList = viewModel.getLocalNoteList
+        val listOfSelectedIds = mutableListOf<Int>()
+        for (i in localNoteList) {
+            if (i.isSelected) listOfSelectedIds.add(i.id)
+        }
+        return listOfSelectedIds
+    }
 }
